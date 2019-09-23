@@ -2,7 +2,7 @@
 This is a nextcloud app which provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.
 
 # Requirements
-This app requires php after version 7 and the mbstring extension
+This app requires php after version 5 and the mbstring extension
 
 # Install
 To install it simply copy and paste the application into the apps directory of your nextcloud server instance. 
