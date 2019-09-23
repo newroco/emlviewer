@@ -1,0 +1,338 @@
+MIME message decoding successful.
+1 message was found.
+Message 1:
+array(4) {
+  ["Headers"]=>
+  array(11) {
+    ["return-path:"]=>
+    string(16) "<mlemos@acm.org>"
+    ["to:"]=>
+    string(33) "Manuel Lemos <mlemos@linux.local>"
+    ["subject:"]=>
+    string(79) "Testing Manuel Lemos' MIME E-mail composing and sending PHP class: HTML message"
+    ["from:"]=>
+    string(23) "mlemos <mlemos@acm.org>"
+    ["reply-to:"]=>
+    string(23) "mlemos <mlemos@acm.org>"
+    ["sender:"]=>
+    string(14) "mlemos@acm.org"
+    ["x-mailer:"]=>
+    string(62) "http://www.phpclasses.org/mimemessage $Revision: 1.63 $ (mail)"
+    ["mime-version:"]=>
+    string(3) "1.0"
+    ["content-type:"]=>
+    string(60) "multipart/mixed; boundary="652b8c4dcb00cdcdda1e16af36781caf""
+    ["message-id:"]=>
+    string(36) "<20050430192829.0489.mlemos@acm.org>"
+    ["date:"]=>
+    string(31) "Sat, 30 Apr 2005 19:28:29 -0300"
+  }
+  ["Parts"]=>
+  array(2) {
+    [0]=>
+    array(3) {
+      ["Headers"]=>
+      array(1) {
+        ["content-type:"]=>
+        string(62) "multipart/related; boundary="6a82fb459dcaacd40ab3404529e808dc""
+      }
+      ["Parts"]=>
+      array(3) {
+        [0]=>
+        array(3) {
+          ["Headers"]=>
+          array(1) {
+            ["content-type:"]=>
+            string(66) "multipart/alternative; boundary="69c1683a3ee16ef7cf16edd700694a2f""
+          }
+          ["Parts"]=>
+          array(2) {
+            [0]=>
+            array(5) {
+              ["Headers"]=>
+              array(2) {
+                ["content-type:"]=>
+                string(30) "text/plain; charset=ISO-8859-1"
+                ["content-transfer-encoding:"]=>
+                string(16) "quoted-printable"
+              }
+              ["Parts"]=>
+              array(0) {
+              }
+              ["Position"]=>
+              int(788)
+              ["BodyPart"]=>
+              int(1)
+              ["BodyLength"]=>
+              int(91)
+            }
+            [1]=>
+            array(5) {
+              ["Headers"]=>
+              array(2) {
+                ["content-type:"]=>
+                string(29) "text/html; charset=ISO-8859-1"
+                ["content-transfer-encoding:"]=>
+                string(16) "quoted-printable"
+              }
+              ["Parts"]=>
+              array(0) {
+              }
+              ["Position"]=>
+              int(1008)
+              ["BodyPart"]=>
+              int(2)
+              ["BodyLength"]=>
+              int(961)
+            }
+          }
+          ["Position"]=>
+          int(666)
+        }
+        [1]=>
+        array(7) {
+          ["Headers"]=>
+          array(4) {
+            ["content-type:"]=>
+            string(26) "image/gif; name="logo.gif""
+            ["content-transfer-encoding:"]=>
+            string(6) "base64"
+            ["content-disposition:"]=>
+            string(27) "inline; filename="logo.gif""
+            ["content-id:"]=>
+            string(38) "<ae0357e57f04b8347f7621662cb63855.gif>"
+          }
+          ["Parts"]=>
+          array(0) {
+          }
+          ["Position"]=>
+          int(2171)
+          ["FileName"]=>
+          string(8) "logo.gif"
+          ["FileDisposition"]=>
+          string(6) "inline"
+          ["BodyPart"]=>
+          int(3)
+          ["BodyLength"]=>
+          int(1195)
+        }
+        [2]=>
+        array(7) {
+          ["Headers"]=>
+          array(4) {
+            ["content-type:"]=>
+            string(32) "image/gif; name="background.gif""
+            ["content-transfer-encoding:"]=>
+            string(6) "base64"
+            ["content-disposition:"]=>
+            string(33) "inline; filename="background.gif""
+            ["content-id:"]=>
+            string(38) "<4c837ed463ad29c820668e835a270e8a.gif>"
+          }
+          ["Parts"]=>
+          array(0) {
+          }
+          ["Position"]=>
+          int(4028)
+          ["FileName"]=>
+          string(14) "background.gif"
+          ["FileDisposition"]=>
+          string(6) "inline"
+          ["BodyPart"]=>
+          int(4)
+          ["BodyLength"]=>
+          int(3265)
+        }
+      }
+      ["Position"]=>
+      int(548)
+    }
+    [1]=>
+    array(7) {
+      ["Headers"]=>
+      array(3) {
+        ["content-type:"]=>
+        string(33) "text/plain; name="attachment.txt""
+        ["content-transfer-encoding:"]=>
+        string(6) "base64"
+        ["content-disposition:"]=>
+        string(37) "attachment; filename="attachment.txt""
+      }
+      ["Parts"]=>
+      array(0) {
+      }
+      ["Position"]=>
+      int(8771)
+      ["FileName"]=>
+      string(14) "attachment.txt"
+      ["FileDisposition"]=>
+      string(10) "attachment"
+      ["BodyPart"]=>
+      int(5)
+      ["BodyLength"]=>
+      int(64)
+    }
+  }
+  ["Position"]=>
+  int(0)
+  ["ExtractedAddresses"]=>
+  array(4) {
+    ["return-path:"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["address"]=>
+        string(14) "mlemos@acm.org"
+      }
+    }
+    ["to:"]=>
+    array(1) {
+      [0]=>
+      array(2) {
+        ["address"]=>
+        string(18) "mlemos@linux.local"
+        ["name"]=>
+        string(12) "Manuel Lemos"
+      }
+    }
+    ["from:"]=>
+    array(1) {
+      [0]=>
+      array(2) {
+        ["address"]=>
+        string(14) "mlemos@acm.org"
+        ["name"]=>
+        string(6) "mlemos"
+      }
+    }
+    ["reply-to:"]=>
+    array(1) {
+      [0]=>
+      array(2) {
+        ["address"]=>
+        string(14) "mlemos@acm.org"
+        ["name"]=>
+        string(6) "mlemos"
+      }
+    }
+  }
+}
+array(13) {
+  ["Type"]=>
+  string(4) "html"
+  ["Description"]=>
+  string(12) "HTML message"
+  ["Encoding"]=>
+  string(10) "iso-8859-1"
+  ["DataLength"]=>
+  int(961)
+  ["Alternative"]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["Type"]=>
+      string(4) "text"
+      ["Description"]=>
+      string(12) "Text message"
+      ["Encoding"]=>
+      string(10) "iso-8859-1"
+      ["DataLength"]=>
+      int(91)
+    }
+  }
+  ["Related"]=>
+  array(2) {
+    [0]=>
+    array(7) {
+      ["Type"]=>
+      string(5) "image"
+      ["SubType"]=>
+      string(3) "gif"
+      ["Description"]=>
+      string(28) "Image file in the GIF format"
+      ["DataLength"]=>
+      int(1195)
+      ["FileName"]=>
+      string(8) "logo.gif"
+      ["FileDisposition"]=>
+      string(6) "inline"
+      ["ContentID"]=>
+      string(36) "ae0357e57f04b8347f7621662cb63855.gif"
+    }
+    [1]=>
+    array(7) {
+      ["Type"]=>
+      string(5) "image"
+      ["SubType"]=>
+      string(3) "gif"
+      ["Description"]=>
+      string(28) "Image file in the GIF format"
+      ["DataLength"]=>
+      int(3265)
+      ["FileName"]=>
+      string(14) "background.gif"
+      ["FileDisposition"]=>
+      string(6) "inline"
+      ["ContentID"]=>
+      string(36) "4c837ed463ad29c820668e835a270e8a.gif"
+    }
+  }
+  ["Attachments"]=>
+  array(1) {
+    [0]=>
+    array(5) {
+      ["Type"]=>
+      string(4) "text"
+      ["Description"]=>
+      string(12) "Text message"
+      ["DataLength"]=>
+      int(64)
+      ["FileName"]=>
+      string(14) "attachment.txt"
+      ["FileDisposition"]=>
+      string(10) "attachment"
+    }
+  }
+  ["Subject"]=>
+  string(79) "Testing Manuel Lemos' MIME E-mail composing and sending PHP class: HTML message"
+  ["Date"]=>
+  string(31) "Sat, 30 Apr 2005 19:28:29 -0300"
+  ["From"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["address"]=>
+      string(14) "mlemos@acm.org"
+      ["name"]=>
+      string(6) "mlemos"
+    }
+  }
+  ["To"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["address"]=>
+      string(18) "mlemos@linux.local"
+      ["name"]=>
+      string(12) "Manuel Lemos"
+    }
+  }
+  ["Return-path"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["address"]=>
+      string(14) "mlemos@acm.org"
+    }
+  }
+  ["Reply-to"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["address"]=>
+      string(14) "mlemos@acm.org"
+      ["name"]=>
+      string(6) "mlemos"
+    }
+  }
+}

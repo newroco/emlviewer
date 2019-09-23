@@ -1,0 +1,87 @@
+MIME message decoding successful.
+1 message was found.
+Message 1:
+array(7) {
+  ["Headers"]=>
+  array(7) {
+    ["date:"]=>
+    string(31) "Sat, 01 Jan 2000 00:00:00 -0000"
+    ["from:"]=>
+    string(13) "test@test.com"
+    ["mime-version:"]=>
+    string(3) "1.0"
+    ["to:"]=>
+    string(13) "test@test.com"
+    ["subject:"]=>
+    string(4) "test"
+    ["content-type:"]=>
+    string(30) "text/plain; charset=ISO-8859-1"
+    ["content-transfer-encoding:"]=>
+    string(4) "7bit"
+  }
+  ["Parts"]=>
+  array(0) {
+  }
+  ["Position"]=>
+  int(0)
+  ["Body"]=>
+  string(38) "Body without empty separation line
+
+"
+  ["BodyPart"]=>
+  int(1)
+  ["BodyLength"]=>
+  int(38)
+  ["ExtractedAddresses"]=>
+  array(2) {
+    ["from:"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["address"]=>
+        string(13) "test@test.com"
+      }
+    }
+    ["to:"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["address"]=>
+        string(13) "test@test.com"
+      }
+    }
+  }
+}
+array(8) {
+  ["Type"]=>
+  string(4) "text"
+  ["Description"]=>
+  string(12) "Text message"
+  ["Encoding"]=>
+  string(10) "iso-8859-1"
+  ["Subject"]=>
+  string(4) "test"
+  ["Date"]=>
+  string(31) "Sat, 01 Jan 2000 00:00:00 -0000"
+  ["From"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["address"]=>
+      string(13) "test@test.com"
+    }
+  }
+  ["To"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["address"]=>
+      string(13) "test@test.com"
+    }
+  }
+  ["Data"]=>
+  string(38) "Body without empty separation line
+
+"
+}
+Warning: message headers do not end with empty line at position 192 line 8 column 1

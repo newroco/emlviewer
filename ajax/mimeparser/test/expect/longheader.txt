@@ -1,0 +1,23 @@
+MIME message decoding successful.
+1 message was found.
+Message 1:
+array(3) {
+  ["Headers"]=>
+  array(1) {
+    ["subject:"]=>
+    string(216) "very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long"
+  }
+  ["Parts"]=>
+  array(0) {
+  }
+  ["Position"]=>
+  int(0)
+}
+array(3) {
+  ["Type"]=>
+  string(4) "text"
+  ["Description"]=>
+  string(12) "Text message"
+  ["Subject"]=>
+  string(216) "very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long long subject very long"
+}

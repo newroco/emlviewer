@@ -1,0 +1,9 @@
+From: test <test@test.com>
+To: test <test@test.com>
+Subject: Isto =?iso-8859-1?q?=E9_um_teste?= 	=?iso-8859-1?q?_e_isto_=E9_outro_teste?=
+Date: Mon, 25 Mar 2011 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Isto =E9 um teste e isto =E9 outro teste

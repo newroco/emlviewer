@@ -1,0 +1,6 @@
+{
+    "name": "root/ajax",
+    "require": {
+        "zbateson/mail-mime-parser": "^1.1"
+    }
+}

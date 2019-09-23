@@ -1,0 +1,222 @@
+Parsed address: test@test.com
+array(1) {
+  [0]=>
+  array(1) {
+    ["address"]=>
+    string(13) "test@test.com"
+  }
+}
+Parsed address: "quoted test"@test.com
+array(1) {
+  [0]=>
+  array(1) {
+    ["address"]=>
+    string(20) "quoted test@test.com"
+  }
+}
+Parsed address: test name <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test name"
+  }
+}
+Parsed address: test.name <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test.name"
+  }
+}
+Parsed address: "test@name" <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test@name"
+  }
+}
+Parsed address: test@name <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test@name"
+  }
+}
+Warning: it was specified an unquoted address as name at position 0
+Parsed address: "test\"name" <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test"name"
+  }
+}
+Parsed address: test@test.com (test name)
+array(1) {
+  [0]=>
+  array(1) {
+    ["address"]=>
+    string(13) "test@test.com"
+  }
+}
+Parsed address: test@test.com, test name <test@test.com>
+array(2) {
+  [0]=>
+  array(1) {
+    ["address"]=>
+    string(13) "test@test.com"
+  }
+  [1]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(9) "test name"
+  }
+}
+Parsed address: Isto é um teste <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(15) "Isto é um teste"
+  }
+}
+Warning: it was used an unencoded 8 bit character at position 5
+Parsed address: Isto =?iso-8859-1?q?=E9_um_teste?= <test@test.com>
+array(1) {
+  [0]=>
+  array(3) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(15) "Isto é um teste"
+    ["encoding"]=>
+    string(10) "iso-8859-1"
+  }
+}
+Parsed address: "Isto é um teste" <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(15) "Isto é um teste"
+  }
+}
+Warning: it was used an unencoded 8 bit character at position 6
+Parsed address: Isto =?iso-8859-1?q?=E9_um_teste?= 	=?iso-8859-1?q?_e_isto_=E9_outro_teste?=<test@test.com>
+array(1) {
+  [0]=>
+  array(3) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(36) "Isto é um teste e isto é outro teste"
+    ["encoding"]=>
+    string(10) "iso-8859-1"
+  }
+}
+Parsed address: undisclosed-recipients:;
+array(1) {
+  [0]=>
+  array(2) {
+    ["name"]=>
+    string(22) "undisclosed-recipients"
+    ["group"]=>
+    array(0) {
+    }
+  }
+}
+Parsed address: undisclosed-recipients:; (some comments)
+array(1) {
+  [0]=>
+  array(2) {
+    ["name"]=>
+    string(22) "undisclosed-recipients"
+    ["group"]=>
+    array(0) {
+    }
+  }
+}
+Warning: it were used invalid comments after a group of addresses at position 24
+Parsed address: mailing-list: test@test.com, test name <test@test.com>;, another test <another_test@test.com>
+array(2) {
+  [0]=>
+  array(2) {
+    ["name"]=>
+    string(12) "mailing-list"
+    ["group"]=>
+    array(2) {
+      [0]=>
+      array(1) {
+        ["address"]=>
+        string(13) "test@test.com"
+      }
+      [1]=>
+      array(2) {
+        ["address"]=>
+        string(13) "test@test.com"
+        ["name"]=>
+        string(9) "test name"
+      }
+    }
+  }
+  [1]=>
+  array(2) {
+    ["address"]=>
+    string(21) "another_test@test.com"
+    ["name"]=>
+    string(12) "another test"
+  }
+}
+Parsed address: \\Escape in the beginning <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(24) "\Escape in the beginning"
+  }
+}
+Warning: it was used an escape character outside a quoted value at position 0
+Parsed address: Escape in the\\middle <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(20) "Escape in the\middle"
+  }
+}
+Warning: it was used an escape character outside a quoted value at position 13
+Parsed address: Escape in the end\\ <test@test.com>
+array(1) {
+  [0]=>
+  array(2) {
+    ["address"]=>
+    string(13) "test@test.com"
+    ["name"]=>
+    string(18) "Escape in the end\"
+  }
+}
+Warning: it was used an escape character outside a quoted value at position 17

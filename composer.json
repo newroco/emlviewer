@@ -1,0 +1,15 @@
+{
+    "name": "Eml Viewer",
+    "description": "Preview eml files",
+    "type": "project",
+    "license": "AGPL",
+    "authors": [
+        {
+            "name": "Newroco"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^5.4"
+    }
+}
