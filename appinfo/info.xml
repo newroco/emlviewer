@@ -5,7 +5,7 @@
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
     <description><![CDATA[Generate a preview for eml files]]></description>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
     <licence>agpl</licence>
     <author mail="gabriel.dornianu@newro.co" >Newroco</author>
     <namespace>EmlViewer</namespace>
