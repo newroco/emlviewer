@@ -4,15 +4,15 @@
     <id>emlviewer</id>
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
-    <description><![CDATA[Generate a preview for eml files]]></description>
-    <version>0.0.3</version>
+    <description><![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
+    <version>0.0.4</version>
     <licence>agpl</licence>
     <author mail="gabriel.dornianu@newro.co" >Newroco</author>
     <namespace>EmlViewer</namespace>
     <category>files</category>
-    <bugs>https://github.com/</bugs>
+    <bugs>https://github.com/newroco/emlviewer/issues</bugs>
     <dependencies>
-        <nextcloud min-version="15" max-version="15"/>
+        <nextcloud min-version="15" max-version="18"/>
     </dependencies>
     <navigations>
         <navigation>
