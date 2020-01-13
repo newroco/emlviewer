@@ -18,8 +18,9 @@ $(document).ready(function(){
 });
 
 function bringInSidebar() {
-	var defaultHtml = '<a class="close icon-close" href="#"></a>';
-	var styles = 'position: fixed;z-index: 999999;max-width: none;width: 100vw;height: 100vh;top: 0;left: 0;background-color: rgba(255, 255, 255, 0.8);';
+	var overlayStyle="position: fixed;z-index: -1;max-width: none;width: 100vw;height: 100vh;top: 0;left: 0;background-color: rgba(255, 255, 255, 0.91);-webkit-filter: blur(0px);-moz-filter: blur(0px);-o-filter: blur(0px);-ms-filter: blur(0px);filter: blur(0px);"
+	var defaultHtml = '<div class="overlay overlay-blured" style="'+overlayStyle+'"></div><a class="close icon-close" href="#"></a>';
+	var styles = 'position: fixed;z-index: 999999;max-width: none;width: 100vw;height: 100vh;top: 0;left: 0;background-color:rgba(0, 0, 0, 0);';
 	defaultHtml += '<div class="mail-content" style="display: flex;height: 98%;max-width: 768px;margin-left: auto;margin-right: auto;text-align: left;padding-left: 25px;padding-right: 25px;width: 100%;flex-direction: column;">Preparing preview... please wait.</div>';
 
 	$("#app-sidebar").remove();
