@@ -1,6 +1,7 @@
 {
     "name": "root/ajax",
     "require": {
-        "zbateson/mail-mime-parser": "^1.1"
+        "zbateson/mail-mime-parser": "^1.1",
+        "dompdf/dompdf": "^0.8.3"
     }
 }

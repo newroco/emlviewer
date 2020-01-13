@@ -33,8 +33,40 @@ function bringInSidebar() {
 $.fn.extend({
     toggleText: function(a, b){
         return this.text(this.text() == b ? a : b);
-    }
+	}
 });
+
+$.extend({
+		redirectPost: function(location, args){
+			var form = $('<form></form>');
+			form.attr("method", "post");
+			form.attr("action", location);
+	
+			$.each( args, function( key, value ) {
+				var field = $('<input></input>');
+	
+				field.attr("type", "hidden");
+				field.attr("name", key);
+				field.attr("value", value);
+	
+				form.append(field);
+			});
+			$(form).appendTo('body').submit();
+		}
+});
+	
+
+function buildPdf(file) {
+	var redirect = '/apps/emlviewer/ajax/pdf.php';
+	$.redirectPost(redirect, {eml_file: encodeURI(file)});
+	// console.log(file);
+	// $.ajax({
+	// 	async: false,
+	// 	method: 'POST',
+	// 	url: '/apps/emlviewer/ajax/pdf.php',
+	// 	data: { eml_file: encodeURI(file) },
+	// });
+}
 
 function displayParsedEmail(emailFile) {
 	var file = '';
@@ -57,6 +89,7 @@ function displayParsedEmail(emailFile) {
 			success: function(response) {
 				$(".mail-content").html(response);
 				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out");  $('#toggle-text-content').toggleText('Show content', 'Hide content'); });
+				$("button#make-pdf").click(() => { buildPdf(file); });
 			}
 		});
 	} else {
