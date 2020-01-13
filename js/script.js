@@ -30,6 +30,11 @@ function bringInSidebar() {
 	$(".icon-close").click(function(){ $("#app-sidebar").remove(); });
 }
 
+$.fn.extend({
+    toggleText: function(a, b){
+        return this.text(this.text() == b ? a : b);
+    }
+});
 
 function displayParsedEmail(emailFile) {
 	var file = '';
@@ -51,7 +56,7 @@ function displayParsedEmail(emailFile) {
 			data: { eml_file: encodeURI(file) },
 			success: function(response) {
 				$(".mail-content").html(response);
-				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out"); });
+				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out");  $('#toggle-text-content').toggleText('Show content', 'Hide content'); });
 			}
 		});
 	} else {
