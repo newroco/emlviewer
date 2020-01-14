@@ -83,14 +83,14 @@ function displayParsedEmail(emailFile) {
 			file = response;
 		}
 	});
-
+	var baseUrl = OC.generateUrl('/apps/emlviewer');
 	if (file.length) {
 		$.ajax({
 			async: false,
 			method: 'POST',
-			url: '/apps/emlviewer/ajax/emlparse.php',
+			url: baseUrl + '/ajax/emlparse',
 			data: { eml_file: encodeURI(file) },
-			success: function(response) {
+			success: function(response, e) {
 				$(".mail-content").html(response);
 				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out");  $('#toggle-text-content').toggleText('Show content', 'Hide content'); });
 				$("button#make-pdf").click(() => { buildPdf(file); });

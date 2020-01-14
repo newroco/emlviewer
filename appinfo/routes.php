@@ -10,6 +10,6 @@
 return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-       ['name' => 'page#ParseEml', 'url' => '/apps/emlviewer/ajax/emlparse.php', 'verb' => 'POST']
+       ['name' => 'page#parseEml', 'url' => '/ajax/emlparse', 'verb' => 'POST']
     ]
 ];
