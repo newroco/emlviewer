@@ -1,19 +1,31 @@
+const pdfRedirect = '/apps/emlviewer/ajax/pdf.php';
+let tablesBinded = 0;
+let callBind = setInterval(bindTable, 2500);
+
+function bindTable() {
+	$(".list-container:visible").each(function(){
+		var $this = $(this);
+		tablesBinded = 1;
+		$this.find(".name[href$='.eml']").off('click');
+		$this.find(".name[href$='.eml']").on('click', function(e){
+			e.preventDefault();
+			bringInSidebar();
+			displayParsedEmail($(this).attr('href'));
+		});
+		$this.find(".name[href$='.pdf']").on('click', function(e){
+			$('#app-sidebar').remove();
+		});
+	});
+}
+
 $(document).ready(function(){
 	if($("#filestable").length) { 
-		$('#filestable').bind('DOMSubtreeModified', function(e) {
-			$(".name[href$='.eml']").unbind();
-			var emlFiles = $("#filestable tr .name[href$='.eml']");
-			if (emlFiles.length > 0) {
-				$(".name[href$='.eml']").on('click', function(e){
-					e.preventDefault();
-					bringInSidebar();
-					displayParsedEmail($(this).attr('href'));
-				});
-				$(".name[href$='.pdf']").on('click', function(e){
-					$('#app-sidebar').remove();
-				});
-			}
-		});
+		bindTable();
+	}
+
+	if (tablesBinded == 1) {
+		clearInterval(callBind);
+		callBind = null;
 	}
 });
 
@@ -57,20 +69,12 @@ $.extend({
 	
 
 function buildPdf(file) {
-	var redirect = '/apps/emlviewer/ajax/pdf.php';
-	$.redirectPost(redirect, {eml_file: encodeURI(file)});
-	// console.log(file);
-	// $.ajax({
-	// 	async: false,
-	// 	method: 'POST',
-	// 	url: '/apps/emlviewer/ajax/pdf.php',
-	// 	data: { eml_file: encodeURI(file) },
-	// });
+	$.redirectPost(pdfRedirect, {eml_file: encodeURI(file)});
 }
 
 function displayParsedEmail(emailFile) {
 	var file = '';
-
+	
 	$.ajax({
 		async: false,
 		method: 'GET',
