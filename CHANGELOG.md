@@ -12,5 +12,7 @@
   [#2](https://github.com/newroco/emlviewer/issues/2) @incrosnatubogdan
 - Display email's date received
   [#3](https://github.com/newroco/emlviewer/issues/1) @incrosnatubogdan
+- Works on nginx servers
+  [#4](https://github.com/newroco/emlviewer/issues/4) @incrosnatubogdan
 - Accessing an .eml file from shared files offers to download it instead of running emlviewer
   [#7](https://github.com/newroco/emlviewer/issues/7) @incrosnatubogdan

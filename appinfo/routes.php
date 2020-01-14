@@ -1,4 +1,5 @@
 <?php
+namespace OCA\EmlViewer\AppInfo;
 /**
  * Create your routes in here. The name is the lowercase name of the controller
  * without the controller part, the stuff after the hash is the method.
@@ -10,6 +11,7 @@
 return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-       ['name' => 'page#parseEml', 'url' => '/ajax/emlparse', 'verb' => 'POST']
+       ['name' => 'page#parseEml', 'url' => '/ajax/emlparse', 'verb' => 'POST'],
+       ['name' => 'page#pdfPrint', 'url' => '/ajax/pdf', 'verb' => 'POST']
     ]
 ];
