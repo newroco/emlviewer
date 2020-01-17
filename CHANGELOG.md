@@ -1,4 +1,4 @@
-## 0.0.4 – 2020-01-13
+## 0.0.5 – 2020-01-13
 ### Added
 - Add a CHANGELOG.md
   [#5](https://github.com/newroco/emlviewer/issues/5) @incrosnatubogdan
