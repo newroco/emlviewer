@@ -11,7 +11,7 @@ namespace OCA\EmlViewer\AppInfo;
 return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-       ['name' => 'page#parseEml', 'url' => '/ajax/emlparse', 'verb' => 'POST'],
-       ['name' => 'page#pdfPrint', 'url' => '/ajax/pdf', 'verb' => 'POST']
+       ['name' => 'page#parseEml', 'url' => '/emlparse', 'verb' => 'POST'],
+       ['name' => 'page#pdfPrint', 'url' => '/pdf', 'verb' => 'POST']
     ]
 ];

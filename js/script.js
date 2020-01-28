@@ -1,7 +1,7 @@
 let tablesBinded = 0;
 let callBind = setInterval(bindTable, 2500);
 const baseUrl = OC.generateUrl('/apps/emlviewer');
-const pdfRedirect = baseUrl + '/ajax/pdf';
+const pdfRedirect = baseUrl + '/pdf';
 
 function bindTable() {
 	$(".list-container:visible").each(function(){
@@ -89,12 +89,14 @@ function displayParsedEmail(emailFile) {
 		$.ajax({
 			async: false,
 			method: 'POST',
-			url: baseUrl + '/ajax/emlparse',
+			url: baseUrl + '/emlparse',
 			data: { eml_file: encodeURI(file) },
 			success: function(response, e) {
 				$(".mail-content").html(response);
 				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out");  $('#toggle-text-content').toggleText('Show content', 'Hide content'); });
 				$("button#make-pdf").click(() => { buildPdf(file); });
+			},
+			error: function(response) {
 			}
 		});
 	} else {
