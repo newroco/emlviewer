@@ -1,6 +1,7 @@
-const pdfRedirect = '/apps/emlviewer/ajax/pdf.php';
 let tablesBinded = 0;
 let callBind = setInterval(bindTable, 2500);
+const baseUrl = OC.generateUrl('/apps/emlviewer');
+const pdfRedirect = baseUrl + '/ajax/pdf';
 
 function bindTable() {
 	$(".list-container:visible").each(function(){
@@ -83,7 +84,7 @@ function displayParsedEmail(emailFile) {
 			file = response;
 		}
 	});
-	var baseUrl = OC.generateUrl('/apps/emlviewer');
+	
 	if (file.length) {
 		$.ajax({
 			async: false,
