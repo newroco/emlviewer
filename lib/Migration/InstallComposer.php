@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 
 putenv('COMPOSER_HOME=' . __DIR__ . '/vendor/bin/composer');
 
-class MyRepairStep implements IRepairStep {
+class InstallComposer implements IRepairStep {
 
       /** @var ILogger */
       protected $logger;
