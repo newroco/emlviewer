@@ -20,4 +20,9 @@
             <route>emlviewer.page.index</route>
         </navigation>
     </navigations>
+    <repair-steps>
+        <install>
+            <step>OCA\EmlViewer\Migration\InstallComposer</step>
+        </install>
+    </repair-steps>
 </info>

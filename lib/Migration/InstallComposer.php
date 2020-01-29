@@ -9,7 +9,7 @@ use OCP\Migration\IRepairStep;
 use Composer\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 
-putenv('COMPOSER_HOME=' . __DIR__ . '/vendor/bin/composer');
+putenv('COMPOSER_HOME=' . dirname(__FILE__) );
 
 class InstallComposer implements IRepairStep {
 
