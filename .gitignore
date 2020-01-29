@@ -1,2 +1,4 @@
 composer.lock
-vendor
+vendor/*
+!vendor/composer
+!vendor/autoload.php
