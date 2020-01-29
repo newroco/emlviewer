@@ -22,7 +22,7 @@
     </navigations>
     <repair-steps>
         <install>
-            <step>OCA\MyApp\Migration\MyRepairStep</step>
+            <step>OCA\EmlViewer\Migration\InstallComposer</step>
         </install>
     </repair-steps>
 </info>

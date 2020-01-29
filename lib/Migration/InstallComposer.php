@@ -1,5 +1,5 @@
 <?php
-namespace OCA\MyApp\Migration;
+namespace OCA\EmlViewer\Migration;
 
 require dirname(__FILE__)."/../../vendor/autoload.php";
 
