@@ -20,4 +20,9 @@
             <route>emlviewer.page.index</route>
         </navigation>
     </navigations>
+    <repair-steps>
+        <install>
+            <step>OCA\MyApp\Migration\MyRepairStep</step>
+        </install>
+    </repair-steps>
 </info>
