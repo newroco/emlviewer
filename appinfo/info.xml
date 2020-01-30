@@ -5,7 +5,7 @@
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
     <description><![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
-    <version>0.0.6</version>
+    <version>0.0.5</version>
     <licence>agpl</licence>
     <author mail="hello@newro.co" >Newroco</author>
     <namespace>EmlViewer</namespace>
@@ -20,7 +20,4 @@
             <route>emlviewer.page.index</route>
         </navigation>
     </navigations>
-    <repair-steps>
-            <step>OCA\EmlViewer\Migration\InstallComposer</step>
-    </repair-steps>
 </info>
