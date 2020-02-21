@@ -10,7 +10,9 @@
     <author mail="hello@newro.co" >Newroco</author>
     <namespace>EmlViewer</namespace>
     <category>files</category>
+    <website>https://github.com/newroco/emlviewer</website>
     <bugs>https://github.com/newroco/emlviewer/issues</bugs>
+    <repository type="git">https://github.com/newroco/emlviewer.git</repository>
     <dependencies>
         <nextcloud min-version="15" max-version="18"/>
     </dependencies>
