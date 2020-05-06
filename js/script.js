@@ -31,13 +31,11 @@ $(document).ready(function(){
 });
 
 function bringInSidebar() {
-	var overlayStyle="position: fixed;z-index: -1;max-width: none;width: 100vw;height: 100vh;top: 0;left: 0;background-color: rgba(255, 255, 255, 0.91);-webkit-filter: blur(0px);-moz-filter: blur(0px);-o-filter: blur(0px);-ms-filter: blur(0px);filter: blur(0px);"
-	var defaultHtml = '<div class="overlay overlay-blured" style="'+overlayStyle+'"></div><a class="close icon-close" href="#"></a>';
-	var styles = 'position: fixed;z-index: 999999;max-width: none;width: 100vw;height: 100vh;top: 0;left: 0;background-color:rgba(0, 0, 0, 0);';
-	defaultHtml += '<div class="mail-content" style="display: flex;height: 98%;max-width: 768px;margin-left: auto;margin-right: auto;text-align: left;padding-left: 25px;padding-right: 25px;width: 100%;flex-direction: column;">Preparing preview... please wait.</div>';
+	var defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
+	defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
 
 	$("#app-sidebar").remove();
-	$("#app-content").after('<div id="app-sidebar" style="'+styles+'"></div>');
+	$("#app-content").after('<div id="app-sidebar" class="emlviewer"></div>');
 	$("#app-sidebar").html(defaultHtml);
 	$(".icon-close").unbind();
 	$(".icon-close").click(function(){ $("#app-sidebar").remove(); });
@@ -93,10 +91,16 @@ function displayParsedEmail(emailFile) {
 			data: { eml_file: encodeURI(file) },
 			success: function(response, e) {
 				$(".mail-content").html(response);
-				$("#toggle-text-content").click(() => { $("#email-text-content").toggleClass("fade-out");  $('#toggle-text-content').toggleText('Show content', 'Hide content'); });
-				$("button#make-pdf").click(() => { buildPdf(file); });
+				$("#toggle-text-content").click(() => {
+					$("#email-text-content").toggleClass("fade-out");
+					$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
+				});
+				$("button#make-pdf").click(() => {
+					buildPdf(file);
+				});
 			},
 			error: function(response) {
+				$(".mail-content").html('Could not load data from server. Error: ' + response);
 			}
 		});
 	} else {
