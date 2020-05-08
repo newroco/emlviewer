@@ -48,10 +48,13 @@ $.fn.extend({
 });
 
 $.extend({
-		redirectPost: function(location, args){
+		redirectPost: function(location, args,blank = false){
 			var form = $('<form></form>');
 			form.attr("method", "post");
 			form.attr("action", location);
+			if(blank){
+				form.attr("target", '_blank');
+			}
 	
 			$.each( args, function( key, value ) {
 				var field = $('<input></input>');
@@ -68,7 +71,7 @@ $.extend({
 	
 
 function buildPdf(file) {
-	$.redirectPost(pdfRedirect, {eml_file: encodeURI(file)});
+	$.redirectPost(pdfRedirect, {eml_file: encodeURI(file)},true);
 }
 
 function displayParsedEmail(emailFile) {
@@ -91,13 +94,16 @@ function displayParsedEmail(emailFile) {
 			data: { eml_file: encodeURI(file) },
 			success: function(response, e) {
 				$(".mail-content").html(response);
-				$("#toggle-text-content").click(() => {
-					$("#email-text-content").toggleClass("fade-out");
-					$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
-				});
-				$("button#make-pdf").click(() => {
-					buildPdf(file);
-				});
+
+				if($("button#make-pdf").length > 0) {
+					$("#toggle-text-content").click(() => {
+						$("#email-text-content").toggleClass("fade-out");
+						$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
+					});
+					$("button#make-pdf").click(() => {
+						buildPdf(file);
+					});
+				}
 			},
 			error: function(response) {
 				$(".mail-content").html('Could not load data from server. Error: ' + response);

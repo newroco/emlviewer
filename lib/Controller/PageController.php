@@ -36,16 +36,26 @@ class PageController extends Controller {
 	
 	public function parseEml($eml_file) {
 		$eml_file = $_POST['eml_file'];
+		$err = null;
 		if(isset($_POST['eml_file']) && !empty($_POST['eml_file'])){
-			$message = Message::from(urldecode($eml_file));
-            $params = Array();
-            $params['from'] = $message->getHeaderValue('From');
-            $params['to'] = $message->getHeaderValue('To');
-            $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
-            $params['textContent'] = $message->getTextContent();
-            $params['htmlContent'] = str_replace('"', '\'', $message->getHtmlContent());
-            return new TemplateResponse('emlviewer', 'emlcontent',$params,$renderAs = '');  // templates/emlcontent.php
-		}
+            try {
+                $message = Message::from(urldecode($eml_file));
+                $params = Array();
+                $params['from'] = $message->getHeaderValue('From');
+                $params['to'] = $message->getHeaderValue('To');
+                $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
+                $params['textContent'] = $message->getTextContent();
+                $params['htmlContent'] = str_replace('"', '\'', $message->getHtmlContent());
+                return new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
+            }catch(Exception $e){
+                $err = 'Error trying to obtain eml data: '.$e->getMessage();
+            }
+		}else{
+            $err = 'No eml file sent';
+        }
+		if($err){
+		    return $err;
+        }
 	}
 
 	/**
@@ -61,16 +71,27 @@ class PageController extends Controller {
 
 	public function pdfPrint($eml_file) {
 		$eml_file = $_POST['eml_file'];
-		$message = Message::from(urldecode($eml_file));
-		$filename = "Message from " .$message->getHeaderValue('From');
-		
-		$email = str_replace('"', '\'', $message->getHtmlContent());
+        $err = null;
+        if(isset($_POST['eml_file']) && !empty($_POST['eml_file'])) {
+            try {
+                $message = Message::from(urldecode($eml_file));
+                $filename = "Message from " . $message->getHeaderValue('From');
+                $email = str_replace('"', '\'', $message->getHtmlContent());
 
-		$document = new Dompdf();
-		$document->loadHtml($email);
-		$document->setPaper('A4','portrait');
-		$document->render();
-		$document->stream($filename,array("Attachment"=>1));
+                $document = new Dompdf();
+                $document->loadHtml($email);
+                $document->setPaper('A4', 'portrait');
+                $document->render();
+                $document->stream($filename, array("Attachment" => 1));
+            }catch(Exception $e){
+                $err = 'Error trying to obtain eml data: '.$e->getMessage();
+            }
+        }else{
+            $err = 'No eml file sent';
+        }
+        if($err){
+            return $err;
+        }
 	}
 
 	public function index() {
