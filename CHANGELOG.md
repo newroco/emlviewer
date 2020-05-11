@@ -1,3 +1,7 @@
+## 0.0.8 – 2020-05-11
+### Changed
+- Moved mpdf tmp folder outside of vendor folder
+  
 ## 0.0.7 – 2020-05-11
 ### Changed
 - Replaced the tool to generate PDFs from dompdf to mpdf
