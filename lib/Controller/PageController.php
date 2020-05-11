@@ -14,7 +14,6 @@ use OCP\AppFramework\Controller;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
-
 use \Mpdf\Mpdf;
 
 
@@ -91,6 +90,7 @@ class PageController extends Controller {
                 $email = $tidy->repairString($email,$config);
 
                 $mpdf = new Mpdf([
+                    'tempDir' => __DIR__ . '/../../tmp',
                     'mode' => 'UTF-8',
                     'format' => 'A4-P',
                     'margin_left' => 0,
