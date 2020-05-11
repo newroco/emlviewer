@@ -18,6 +18,10 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
     );
 
     public static $prefixLengthsPsr4 = array (
+        's' => 
+        array (
+            'setasign\\Fpdi\\' => 14,
+        ),
         'p' => 
         array (
             'phpDocumentor\\Reflection\\' => 25,
@@ -44,7 +48,6 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
             'Symfony\\Component\\Finder\\' => 25,
             'Symfony\\Component\\Filesystem\\' => 29,
             'Symfony\\Component\\Console\\' => 26,
-            'Svg\\' => 4,
             'Seld\\PharUtils\\' => 15,
             'Seld\\JsonLint\\' => 14,
         ),
@@ -59,6 +62,10 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
             'Psr\\Container\\' => 14,
             'Prophecy\\' => 9,
         ),
+        'M' => 
+        array (
+            'Mpdf\\' => 5,
+        ),
         'J' => 
         array (
             'JsonSchema\\' => 11,
@@ -67,13 +74,8 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         array (
             'GuzzleHttp\\Psr7\\' => 16,
         ),
-        'F' => 
-        array (
-            'FontLib\\' => 8,
-        ),
         'D' => 
         array (
-            'Dompdf\\' => 7,
             'Doctrine\\Instantiator\\' => 22,
             'DeepCopy\\' => 9,
         ),
@@ -88,6 +90,10 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
     );
 
     public static $prefixDirsPsr4 = array (
+        'setasign\\Fpdi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/setasign/fpdi/src',
+        ),
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
@@ -150,10 +156,6 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         array (
             0 => __DIR__ . '/..' . '/symfony/console',
         ),
-        'Svg\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/phenx/php-svg-lib/src/Svg',
-        ),
         'Seld\\PharUtils\\' => 
         array (
             0 => __DIR__ . '/..' . '/seld/phar-utils/src',
@@ -182,6 +184,10 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
         ),
+        'Mpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
         'JsonSchema\\' => 
         array (
             0 => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema',
@@ -189,14 +195,6 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         'GuzzleHttp\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
-        ),
-        'FontLib\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/phenx/php-font-lib/src/FontLib',
-        ),
-        'Dompdf\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dompdf/dompdf/src',
         ),
         'Doctrine\\Instantiator\\' => 
         array (
@@ -228,26 +226,10 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         ),
     );
 
-    public static $prefixesPsr0 = array (
-        'S' => 
-        array (
-            'Sabberworm\\CSS' => 
-            array (
-                0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/lib',
-            ),
-        ),
-    );
-
     public static $classMap = array (
-        'Dompdf\\Cpdf' => __DIR__ . '/..' . '/dompdf/dompdf/lib/Cpdf.php',
         'File_Iterator' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Iterator.php',
         'File_Iterator_Facade' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Facade.php',
         'File_Iterator_Factory' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Factory.php',
-        'HTML5_Data' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Data.php',
-        'HTML5_InputStream' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/InputStream.php',
-        'HTML5_Parser' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Parser.php',
-        'HTML5_Tokenizer' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Tokenizer.php',
-        'HTML5_TreeBuilder' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/TreeBuilder.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/Assert.php',
         'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/AssertionFailedError.php',
@@ -718,7 +700,6 @@ class ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748::$prefixesPsr0;
             $loader->classMap = ComposerStaticInitb122c7b24f216ac9c92bce0705fe5748::$classMap;
 
         }, null, ClassLoader::class);

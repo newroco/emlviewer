@@ -12,8 +12,11 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 
-use Dompdf\Dompdf;
+use tidy;
 use ZBateson\MailMimeParser\Message;
+
+use \Mpdf\Mpdf;
+
 
 class PageController extends Controller {
 	private $userId;
@@ -70,21 +73,44 @@ class PageController extends Controller {
 	 */
 
 	public function pdfPrint($eml_file) {
-		$eml_file = $_POST['eml_file'];
         $err = null;
         if(isset($_POST['eml_file']) && !empty($_POST['eml_file'])) {
+            $eml_file = $_POST['eml_file'];
             try {
                 $message = Message::from(urldecode($eml_file));
-                $filename = "Message from " . $message->getHeaderValue('From');
+                $from = $message->getHeaderValue('From');
+                $to = $message->getHeaderValue('To');
+                $filename = 'Message from '. $from.' to '.$to.'.pdf';
                 $email = str_replace('"', '\'', $message->getHtmlContent());
+                $tidy = new tidy();
+                //Specify configuration
+                $config = array(
+                    'indent'         => true,
+                    'output-xhtml'   => true,
+                    'wrap'           => 200);
+                $email = $tidy->repairString($email,$config);
 
-                $document = new Dompdf();
-                $document->loadHtml($email);
-                $document->setPaper('A4', 'portrait');
-                $document->render();
-                $document->stream($filename, array("Attachment" => 1));
+                $mpdf = new Mpdf([
+                    'mode' => 'UTF-8',
+                    'format' => 'A4-P',
+                    'margin_left' => 0,
+                    'margin_right' => 0,
+                    'margin_top' => 0,
+                    'margin_bottom' => 0,
+                    'margin_header' => 0,
+                    'margin_footer' => 0,
+                    //'debug' => true,
+                    'allow_output_buffering' => true,
+                    //'simpleTable' => true,
+                    'author' => 'Eml Viewer'
+                ]);
+                $mpdf->curlAllowUnsafeSslRequests = true;
+                $mpdf->curlTimeout  = 1;
+                $mpdf->SetDisplayMode('fullwidth','single');
+                $mpdf->WriteHTML($email);
+                $mpdf->Output($filename,'I');
             }catch(Exception $e){
-                $err = 'Error trying to obtain eml data: '.$e->getMessage();
+                $err = 'Error trying to render pdf: '.$e->getMessage().'<br/>'.$e->getTraceAsString();
             }
         }else{
             $err = 'No eml file sent';

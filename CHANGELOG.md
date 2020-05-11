@@ -1,3 +1,17 @@
+## 0.0.7 – 2020-05-11
+### Changed
+- Replaced the tool to generate PDFs from dompdf to mpdf
+- Added tidy to the mix to make sure html email is valid
+  [#9](https://github.com/newroco/emlviewer/issues/9) @lucianpricop
+  
+## 0.0.6 – 2020-05-06
+### Changed
+- Improved error reporting
+- Tested on NC19
+- Fixed paths to fix issues
+  [#8](https://github.com/newroco/emlviewer/issues/8) @lucianpricop
+  [#11](https://github.com/newroco/emlviewer/issues/11) @lucianpricop
+  
 ## 0.0.5 – 2020-01-13
 ### Added
 - Add a CHANGELOG.md
