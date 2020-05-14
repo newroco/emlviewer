@@ -46,9 +46,13 @@ class PageController extends Controller {
 	 */
 	public function parseEml(){
         $eml_file = '';
+        $print = false;
         $err = null;
-        if(isset($_POST['eml_file'])){
-            $eml_file = urldecode($_POST['eml_file']);
+        if(isset($_GET['eml_file'])){
+            $eml_file = urldecode($_GET['eml_file']);
+        }
+        if(isset($_GET['print'])){
+            $print = true;
         };
         try {
             //$contents = file_get_contents($eml_file);
@@ -68,7 +72,12 @@ class PageController extends Controller {
                 $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
                 $params['textContent'] = $message->getTextContent();
                 $params['htmlContent'] = str_replace('"', '\'', $message->getHtmlContent());
-                $response = new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
+
+                if($print){
+                    $response = new TemplateResponse('emlviewer', 'printcontent', $params, $renderAs = 'blank');  // templates/printcontent.php
+                }else {
+                    $response = new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
+                }
 
                 /*$policy = new ContentSecurityPolicy();
                 //$policy->addAllowedChildSrcDomain('\'self\'');

@@ -29,12 +29,13 @@
 		 * @param fileName
 		 */
 		displayParsedEmail: function(fileName) {
-			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse');
+			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}', {file: fileName});
+			const printerUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&print=', {file: fileName});
+			const pdfUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/pdf?eml_file={file}', {file: fileName});
 			$.ajax({
 				async: false,
-				method: 'POST',
+				method: 'GET',
 				url: parserUrl,
-				data: { eml_file: fileName },
 				success: function(response, e) {
 					$(".mail-content").html(response);
 
@@ -43,8 +44,9 @@
 							$("#email-text-content").toggleClass("fade-out");
 							$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
 						});
-						const pdfUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/pdf?eml_file={file}', {file: fileName});
+
 						$("#make-pdf").attr('href',pdfUrl);
+						$("#printer-friendly").attr('href',printerUrl);
 					}
 				},
 				error: function(response) {

@@ -1,3 +1,8 @@
+## 0.0.11 – 2020-05-14
+### Added
+- Added printer friendly button so people can print from their browser instead of
+relying on our PDF version.
+
 ## 0.0.10 – 2020-05-14
 ### Changed
 - Allowed via NC policy alteration to load external images + PDF tweaks 
