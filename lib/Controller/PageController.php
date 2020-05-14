@@ -70,7 +70,7 @@ class PageController extends Controller {
                 $params['htmlContent'] = str_replace('"', '\'', $message->getHtmlContent());
                 $response = new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
 
-                $policy = new ContentSecurityPolicy();
+                /*$policy = new ContentSecurityPolicy();
                 //$policy->addAllowedChildSrcDomain('\'self\'');
                 //allow loading external images
                 $policy->addAllowedChildSrcDomain('*');
@@ -79,7 +79,7 @@ class PageController extends Controller {
                 $policy->addAllowedFontDomain('data:');
                 $policy->addAllowedImageDomain('*');
                 $policy->allowEvalScript(false);
-                $response->setContentSecurityPolicy($policy);
+                $response->setContentSecurityPolicy($policy);*/
 
             }catch(Exception $e){
                 $err = 'Error trying to obtain eml data: '.$e->getMessage();
@@ -132,12 +132,19 @@ class PageController extends Controller {
                         'tempDir' => __DIR__ . '/../../tmp',
                         'mode' => 'UTF-8',
                         'format' => 'A4-P',
+                        'default_font' => 'arial',
                         'margin_left' => 5,
                         'margin_right' => 5,
                         //'debug' => true,
                         'allow_output_buffering' => true,
-                        //'simpleTable' => true,
-                        'author' => 'Eml Viewer'
+                        'simpleTable' => false,
+                        'use_kwt' => true,
+                        'ignore_table_widths' => true,
+                        'shrink_tables_to_fit' => false,
+                        //'table_error_report' =>true,
+                        'allow_charset_conversion' => true,
+                        //'CSSselectMedia' => 'screen',
+                        'author' => 'nextcloud emlviewer'
                     ]);
                     $mpdf->curlAllowUnsafeSslRequests = true;
                     $mpdf->curlTimeout = 1;

@@ -13,11 +13,29 @@ class Application extends App {
     public function __construct() {
         parent::__construct(self::APP_ID);
 
-        $container = $this->getContainer();
+        $manager = \OC::$server->getContentSecurityPolicyManager();
+        $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+
+        $policy->addAllowedStyleDomain('\'self\'');
+        $policy->addAllowedScriptDomain('\'self\'');
+
+        $policy->addAllowedImageDomain('*');
+        $policy->addAllowedImageDomain('data:');
+        $policy->addAllowedImageDomain('blob:');
+
+        $policy->addAllowedMediaDomain('\'self\'');
+        $policy->addAllowedMediaDomain('blob:');
+
+        $policy->addAllowedChildSrcDomain('\'self\'');
+
+        $policy->addAllowedConnectDomain('\'self\'');
+
+        $manager->addDefaultPolicy($policy);
 
         /**
          * Storage Layer
          */
+        $container = $this->getContainer();
         $container->registerService('AuthorStorage', function($c) {
             return new AuthorStorage($c->query('RootStorage'));
         });
@@ -25,6 +43,9 @@ class Application extends App {
         $container->registerService('RootStorage', function($c) {
             return $c->query('ServerContainer')->getUserFolder();
         });
+
+        $manager = \OC::$server->getContentSecurityPolicyManager();
+
     }
     public function register(){
         $this->registerScripts();

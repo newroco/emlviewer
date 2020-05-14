@@ -1,3 +1,9 @@
+## 0.0.10 – 2020-05-14
+### Changed
+- Allowed via NC policy alteration to load external images + PDF tweaks 
+  [#12](https://github.com/newroco/emlviewer/issues/12) @lucianpricop
+- PDF tweaks
+
 ## 0.0.9 – 2020-05-14
 ### Changed
 - Improved loading speed. Before the contents of the eml file were requested 
