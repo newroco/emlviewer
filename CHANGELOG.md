@@ -1,3 +1,9 @@
+## 0.0.9 – 2020-05-14
+### Changed
+- Improved loading speed. Before the contents of the eml file were requested 
+from client, then sent url encoded to server to obtain the parsed version. Now
+the server access the contents directly 
+    
 ## 0.0.8 – 2020-05-11
 ### Changed
 - Moved mpdf tmp folder outside of vendor folder

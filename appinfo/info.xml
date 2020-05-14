@@ -5,7 +5,7 @@
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
     <description><![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
-    <version>0.0.8</version>
+    <version>0.0.9</version>
     <licence>agpl</licence>
     <author mail="hello@newro.co" >newroco</author>
     <namespace>EmlViewer</namespace>
@@ -16,11 +16,6 @@
     <dependencies>
         <nextcloud min-version="15" max-version="19"/>
     </dependencies>
-    <navigations>
-        <navigation>
-            <name>Eml Viewer</name>
-        </navigation>
-    </navigations>
     <!--<repair-steps>
         <install>
             <step>OCA\EmlViewer\Migration\SetupUpdateStep</step>

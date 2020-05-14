@@ -1,115 +1,91 @@
-let tablesBinded = 0;
-let callBind = setInterval(bindTable, 2500);
-const baseUrl = OC.generateUrl('/apps/emlviewer');
-const pdfRedirect = baseUrl + '/pdf';
+(function(OCA) {
 
-function bindTable() {
-	$(".list-container:visible").each(function(){
-		var $this = $(this);
-		tablesBinded = 1;
-		$this.find(".name[href$='.eml']").off('click');
-		$this.find(".name[href$='.eml']").on('click', function(e){
-			e.preventDefault();
-			bringInSidebar();
-			displayParsedEmail($(this).attr('href'));
-		});
-		$this.find(".name[href$='.pdf']").on('click', function(e){
-			$('#app-sidebar').remove();
-		});
-	});
-}
+	OCA.FilesEmlViewer = OCA.FilesEmlViewer || {};
 
-$(document).ready(function(){
-	if($("#filestable").length) { 
-		bindTable();
-	}
+	/**
+	 * @namespace OCA.FilesEmlViewer.PreviewPlugin
+	 */
+	OCA.FilesEmlViewer.PreviewEml = {
 
-	if (tablesBinded == 1) {
-		clearInterval(callBind);
-		callBind = null;
-	}
-});
+		_baseUrl: '/apps/emlviewer',
+		/**
+		 * @param fileList
+		 */
+		attach: function(fileList) {
+			this._extendFileActions(fileList.fileActions);
+		},
 
-function bringInSidebar() {
-	var defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
-	defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
+		bringInSidebar: function() {
+			var defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
+			defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
 
-	$("#app-sidebar").remove();
-	$("#app-content").after('<div id="app-sidebar" class="emlviewer"></div>');
-	$("#app-sidebar").html(defaultHtml);
-	$(".icon-close").unbind();
-	$(".icon-close").click(function(){ $("#app-sidebar").remove(); });
-}
+			$("#app-sidebar").remove();
+			$("#app-content").after('<div id="app-sidebar" class="emlviewer"></div>');
+			$("#app-sidebar").html(defaultHtml);
+			$(".icon-close").unbind();
+			$(".icon-close").click(function(){ $("#app-sidebar").remove(); });
+		},
+		/**
+		 * @param fileName
+		 */
+		displayParsedEmail: function(fileName) {
+			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse');
+			$.ajax({
+				async: false,
+				method: 'POST',
+				url: parserUrl,
+				data: { eml_file: fileName },
+				success: function(response, e) {
+					$(".mail-content").html(response);
 
-$.fn.extend({
-    toggleText: function(a, b){
-        return this.text(this.text() == b ? a : b);
-	}
-});
-
-$.extend({
-		redirectPost: function(location, args,blank = false){
-			var form = $('<form></form>');
-			form.attr("method", "post");
-			form.attr("action", location);
-			if(blank){
-				form.attr("target", '_blank');
-			}
-	
-			$.each( args, function( key, value ) {
-				var field = $('<input></input>');
-	
-				field.attr("type", "hidden");
-				field.attr("name", key);
-				field.attr("value", value);
-	
-				form.append(field);
-			});
-			$(form).appendTo('body').submit();
-		}
-});
-	
-
-function buildPdf(file) {
-	$.redirectPost(pdfRedirect, {eml_file: encodeURI(file)},true);
-}
-
-function displayParsedEmail(emailFile) {
-	var file = '';
-	
-	$.ajax({
-		async: false,
-		method: 'GET',
-		url: emailFile,
-		success: function(response) {
-			file = response;
-		}
-	});
-	
-	if (file.length) {
-		$.ajax({
-			async: false,
-			method: 'POST',
-			url: baseUrl + '/emlparse',
-			data: { eml_file: encodeURI(file) },
-			success: function(response, e) {
-				$(".mail-content").html(response);
-
-				if($("button#make-pdf").length > 0) {
-					$("#toggle-text-content").click(() => {
-						$("#email-text-content").toggleClass("fade-out");
-						$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
-					});
-					$("button#make-pdf").click(() => {
-						buildPdf(file);
-					});
+					if($("#make-pdf").length > 0) {
+						$("#toggle-text-content").click(() => {
+							$("#email-text-content").toggleClass("fade-out");
+							$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
+						});
+						const pdfUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/pdf?eml_file={file}', {file: fileName});
+						$("#make-pdf").attr('href',pdfUrl);
+					}
+				},
+				error: function(response) {
+					$(".mail-content").html('Could not load data from server. Error: ' + response);
 				}
-			},
-			error: function(response) {
-				$(".mail-content").html('Could not load data from server. Error: ' + response);
+			});
+		},
+
+		/**
+		 * @param fileName
+		 */
+		show: function(fileName) {
+			this.bringInSidebar();
+			this.displayParsedEmail(fileName);
+		},
+
+		/**
+		 * @param fileActions
+		 * @private
+		 */
+		_extendFileActions: function(fileActions) {
+			var self = this;
+			if (isSecureViewerAvailable()) {
+				return;
 			}
-		});
-	} else {
-		$(".mail-content").text("Error retrieving the eml file. Try again later.");
-	}
-}
+			fileActions.registerAction({
+				name: 'view',
+				displayName: 'View',
+				mime: 'application/octet-stream',
+				permissions: OC.PERMISSION_READ,
+				actionHandler: function(fileName, context) {
+					if (fileName.trim().endsWith('.eml')) {
+						self.show(context.dir+'/'+fileName);
+					}
+				}
+			});
+			fileActions.setDefault('application/octet-stream', 'view');
+		}
+	};
+
+})(OCA);
+
+OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml);
+
