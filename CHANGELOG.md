@@ -1,3 +1,7 @@
+## 0.0.12 – 2020-05-15
+### Removed
+- Removed some mPDF fonts to make the release archive smaller
+
 ## 0.0.11 – 2020-05-14
 ### Added
 - Added printer friendly button so people can print from their browser instead of
