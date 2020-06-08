@@ -14,6 +14,7 @@ use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
 use OCA\EmlViewer\Storage\AuthorStorage;
 use \OCP\Files\NotFoundException;
+use \OCP\ILogger;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
@@ -21,6 +22,7 @@ use \Mpdf\Mpdf;
 
 
 class PageController extends Controller {
+    private $logger;
 	private $userId;
     private $storage;
 
@@ -31,10 +33,11 @@ class PageController extends Controller {
      * @param $UserId
      * @param AuthorStorage $AuthorStorage
      */
-	public function __construct($AppName, IRequest $request, $UserId, AuthorStorage $AuthorStorage){
+	public function __construct($AppName, IRequest $request, $UserId, AuthorStorage $AuthorStorage,ILogger $logger){
 		parent::__construct($AppName, $request);
         $this->storage = $AuthorStorage;
 		$this->userId = $UserId;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -129,13 +132,17 @@ class PageController extends Controller {
                     $to = $message->getHeaderValue('To');
                     $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
                     $email = str_replace('"', '\'', $message->getHtmlContent());
-                    $tidy = new tidy();
-                    //Specify configuration
-                    $config = array(
-                        'indent' => true,
-                        'output-xhtml' => true,
-                        'wrap' => 200);
-                    $email = $tidy->repairString($email, $config);
+                    if(class_exists('tidy')){
+                        $tidy = new tidy();
+                        //Specify configuration
+                        $config = array(
+                            'indent' => true,
+                            'output-xhtml' => true,
+                            'wrap' => 200);
+                        $email = $tidy->repairString($email, $config);
+                    }else{
+                        $this->logger->warning('php-tidy was not found on this server. Please install so emlviewer can produce better PDFs.');
+                    }
 
                     $mpdf = new Mpdf([
                         'tempDir' => __DIR__ . '/../../tmp',

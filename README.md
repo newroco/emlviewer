@@ -8,6 +8,7 @@ This app requires php version greater than 5 and mbstring and tidy extension
 sudo apt-get update
 sudo apt-get install php-tidy
 sudo apt-get install php-mbstring
+sudo service apache2 reload
 </pre>
 
 # :rocket: Installation
