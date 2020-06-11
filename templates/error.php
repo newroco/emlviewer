@@ -1,0 +1,1 @@
+﻿<?php print_unescaped($_['message']) ?>

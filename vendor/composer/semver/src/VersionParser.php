@@ -12,7 +12,7 @@
 namespace Composer\Semver;
 
 use Composer\Semver\Constraint\ConstraintInterface;
-use Composer\Semver\Constraint\EmptyConstraint;
+use Composer\Semver\Constraint\MatchAllConstraint;
 use Composer\Semver\Constraint\MultiConstraint;
 use Composer\Semver\Constraint\Constraint;
 
@@ -112,6 +112,11 @@ class VersionParser
             $this->normalize($match[2]);
 
             $version = $match[1];
+        }
+
+        // normalize master/trunk/default branches to dev-name for BC with 1.x as these used to be valid constraints
+        if (\in_array($version, array('master', 'trunk', 'default'), true)) {
+            $version = 'dev-' . $version;
         }
 
         // if requirement is branch-like, use full name
@@ -250,7 +255,7 @@ class VersionParser
 
         foreach ($orConstraints as $constraints) {
             $andConstraints = preg_split('{(?<!^|as|[=>< ,]) *(?<!-)[, ](?!-) *(?!,|as|$)}', $constraints);
-            if (count($andConstraints) > 1) {
+            if (\count($andConstraints) > 1) {
                 $constraintObjects = array();
                 foreach ($andConstraints as $constraint) {
                     foreach ($this->parseConstraint($constraint) as $parsedConstraint) {
@@ -261,7 +266,7 @@ class VersionParser
                 $constraintObjects = $this->parseConstraint($andConstraints[0]);
             }
 
-            if (1 === count($constraintObjects)) {
+            if (1 === \count($constraintObjects)) {
                 $constraint = $constraintObjects[0];
             } else {
                 $constraint = new MultiConstraint($constraintObjects);
@@ -293,8 +298,12 @@ class VersionParser
             }
         }
 
-        if (preg_match('{^v?[xX*](\.[xX*])*$}i', $constraint)) {
-            return array(new EmptyConstraint());
+        if (preg_match('{^(v)?[xX*](\.[xX*])*$}i', $constraint, $match)) {
+            if (!empty($match[1]) || !empty($match[2])) {
+                return array(new Constraint('>=', '0.0.0.0-dev'));
+            }
+
+            return array(new MatchAllConstraint());
         }
 
         $versionRegex = 'v?(\d++)(?:\.(\d++))?(?:\.(\d++))?(?:\.(\d++))?' . self::$modifierRegex . '(?:\+[^\s]+)?';

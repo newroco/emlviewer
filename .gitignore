@@ -1,5 +1,5 @@
 composer.lock
-.idea
+.idea/
 package-lock.json
 APP_ID.csr
 emlviewer.key
