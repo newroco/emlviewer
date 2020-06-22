@@ -3,6 +3,7 @@
 namespace OCA\EmlViewer\AppInfo;
 
 use OCP\AppFramework\App;
+use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
 use OCP\Util;
 use \OCA\EmlViewer\Storage\AuthorStorage;
 
@@ -14,7 +15,7 @@ class Application extends App {
         parent::__construct(self::APP_ID);
 
         $manager = \OC::$server->getContentSecurityPolicyManager();
-        $policy = new \OCP\AppFramework\Http\EmptyContentSecurityPolicy();
+        $policy = new EmptyContentSecurityPolicy();
 
         $policy->addAllowedStyleDomain('\'self\'');
         $policy->addAllowedScriptDomain('\'self\'');
@@ -22,11 +23,13 @@ class Application extends App {
         $policy->addAllowedImageDomain('*');
         $policy->addAllowedImageDomain('data:');
         $policy->addAllowedImageDomain('blob:');
+        $policy->addAllowedImageDomain('cid:');
 
         $policy->addAllowedMediaDomain('\'self\'');
         $policy->addAllowedMediaDomain('blob:');
 
         $policy->addAllowedChildSrcDomain('\'self\'');
+        $policy->addAllowedChildSrcDomain('blob:');
 
         $policy->addAllowedConnectDomain('\'self\'');
 
@@ -43,8 +46,6 @@ class Application extends App {
         $container->registerService('RootStorage', function($c) {
             return $c->query('ServerContainer')->getUserFolder();
         });
-
-        $manager = \OC::$server->getContentSecurityPolicyManager();
 
     }
     public function register(){

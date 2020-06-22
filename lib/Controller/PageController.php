@@ -70,15 +70,22 @@ class PageController extends Controller {
         try{
             $message = $this->getMessage();
             $params = Array();
+            $csp = new ContentSecurityPolicy();
+            $csp->addAllowedImageDomain('*');
+            $csp->addAllowedMediaDomain('*');
+
             $params['from'] = $message->getHeaderValue('From');
             $params['to'] = $message->getHeaderValue('To');
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
             $params['subject']  = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
+            $params['nonce'] = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
             $params['htmlContent'] = $this->getEmailHTMLContent($message);
 
             if($print){
                 $headers = new TemplateResponse('emlviewer', 'email_headers', $params, $renderAs = '');
+                //$csp->addAllowedScriptDomain('\'unsafe-inline\'');
+                $headers->setContentSecurityPolicy($csp);
                 $headersHtml = $headers->render();
 
                 $whatToInsertBefore = null;
@@ -87,18 +94,18 @@ class PageController extends Controller {
                 $doc->loadHTML($params['htmlContent']);
 
                 //fix usual e-mail table in table pattern
-                $table = $doc->getElementsByTagName('table');
+               /* $table = $doc->getElementsByTagName('table');
                 if($table->length > 0) {
                     $table = $table->item(0);
                     $innerTable = $this->extractTableInTable($table);
                     if ($table !== $innerTable) {
-                        /*$innerTable2 = $innerTable->cloneNode(true);
-                        $table->parentNode->appendChild($innerTable2);
-                        $table->parentNode->removeChild($table);
-                        $whatToInsertBefore = $innerTable2;*/
+                        //$innerTable2 = $innerTable->cloneNode(true);
+                        //$table->parentNode->appendChild($innerTable2);
+                        //$table->parentNode->removeChild($table);
+                        //$whatToInsertBefore = $innerTable2;
                         $whatToInsertBefore = $innerTable;
                     }
-                }
+                }*/
 
                 $fragment = $doc->createDocumentFragment();
                 $fragment->appendXML($headersHtml);
@@ -114,9 +121,6 @@ class PageController extends Controller {
             }else {
                 $response = new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
             }
-            $csp = new ContentSecurityPolicy();
-            $csp->addAllowedImageDomain('*');
-            $csp->addAllowedMediaDomain('*');
             $response->setContentSecurityPolicy($csp);
 
         }catch(Exception $e){

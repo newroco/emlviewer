@@ -5,7 +5,7 @@
 <p>To: <strong><?php p($_['to']) ?></strong></p>
 <p>Date received: <strong><?php p($_['date']) ?></strong></p>
 <p>Subject: <strong><?php p($_['subject']) ?></strong></p>
-<?php if(!empty($_['textContent'])) { ?>
+<?php if(!empty($_['htmlContent'])) { ?>
     <div class="buttonWrapper">
         <button type="button" style="width: 150px;" id="toggle-text-content">Show raw content</button>
         <a href="#" id="make-pdf" target="_blank"><button type="button" style="width: 150px;" >Download as PDF</button></a>
