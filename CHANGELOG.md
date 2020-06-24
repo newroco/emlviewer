@@ -1,3 +1,12 @@
+## 0.0.13 – 2020-06-24
+### Added
+- Added headers in PDF and on printer friendly version
+- Added print button on printer friendly version
+- Added ability to shows and download all attachments
+- Added ability to automatically replace embedded image CID urls so they show in the body of the e-mail
+### Changed
+- php Tidy is now optional, but without it, some emails may not export well to PDF
+
 ## 0.0.12 – 2020-05-15
 ### Removed
 - Removed some mPDF fonts to make the release archive smaller

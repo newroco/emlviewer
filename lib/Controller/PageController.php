@@ -10,6 +10,7 @@ if ((@include_once __DIR__ . '/../../vendor/autoload.php')===false) {
 }
 
 use OCP\IRequest;
+use \OCP\IURLGenerator;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
@@ -27,6 +28,9 @@ class PageController extends Controller {
 	private $userId;
     private $storage;
     private $message;
+    private $urlGenerator;
+    private $emlFile;
+    protected $AppName;
 
     /**
      * @return mixed
@@ -46,19 +50,24 @@ class PageController extends Controller {
      * @param $UserId
      * @param AuthorStorage $AuthorStorage
      */
-	public function __construct($AppName, IRequest $request, $UserId, AuthorStorage $AuthorStorage,ILogger $logger){
+	public function __construct($AppName, IRequest $request, $UserId,
+                                AuthorStorage $AuthorStorage,
+                                ILogger $logger,
+                                IURLGenerator $urlGenerator){
 		parent::__construct($AppName, $request);
+		$this->AppName = $AppName;
         $this->storage = $AuthorStorage;
 		$this->userId = $UserId;
 		$this->logger = $logger;
 		$this->message = null;
+        $this->urlGenerator = $urlGenerator;
 	}
 
 
 	/**
      * @PublicPage
 	 * @NoAdminRequired
-	 * @NoCSRFRequired
+     * @NoCSRFRequired
      * @param bool $print
      *
      * @return TemplateResponse
@@ -74,6 +83,17 @@ class PageController extends Controller {
             $csp->addAllowedImageDomain('*');
             $csp->addAllowedMediaDomain('*');
 
+            //URLs
+            $params['urlPrinter'] = $this->urlGenerator->linkToRoute(
+                $this->AppName.'.page.emlPrint',
+                array('eml_file' => $this->emlFile,'print'=>''));
+            $params['urlPdf'] = $this->urlGenerator->linkToRoute(
+                $this->AppName.'.page.pdfPrint',
+                array('eml_file' => $this->emlFile));
+            $params['urlAttachment'] = $this->urlGenerator->linkToRoute(
+                $this->AppName.'.page.attachment',
+                array('eml_file' => $this->emlFile,'att'=>''));
+            //Headers
             $params['from'] = $message->getHeaderValue('From');
             $params['to'] = $message->getHeaderValue('To');
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
@@ -81,9 +101,16 @@ class PageController extends Controller {
             $params['textContent'] = $message->getTextContent();
             $params['nonce'] = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
             $params['htmlContent'] = $this->getEmailHTMLContent($message);
+            $params['attachments'] = Array();
+            //handle attachments
+            $atts = $message->getAllAttachmentParts();
+            foreach ($atts as $ind => $part) {
+                $params['attachments'][$ind] = self::getPartFilename($part);
+            }
+
 
             if($print){
-                $headers = new TemplateResponse('emlviewer', 'email_headers', $params, $renderAs = '');
+                $headers = new TemplateResponse($this->AppName, 'email_headers', $params, $renderAs = '');
                 //$csp->addAllowedScriptDomain('\'unsafe-inline\'');
                 $headers->setContentSecurityPolicy($csp);
                 $headersHtml = $headers->render();
@@ -117,14 +144,14 @@ class PageController extends Controller {
 
                  $params['htmlContent'] = $doc->saveHTML();
 
-                $response = new TemplateResponse('emlviewer', 'printcontent', $params, $renderAs = 'blank');  // templates/printcontent.php
+                $response = new TemplateResponse($this->AppName, 'printcontent', $params, $renderAs = 'blank');  // templates/printcontent.php
             }else {
-                $response = new TemplateResponse('emlviewer', 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
+                $response = new TemplateResponse($this->AppName, 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
             }
             $response->setContentSecurityPolicy($csp);
 
         }catch(Exception $e){
-            $response = new TemplateResponse('emlviewer', 'error', [
+            $response = new TemplateResponse($this->AppName, 'error', [
                 'message' => 'Error trying to obtain eml data: '. $e->getMessage()],
                 $renderAs = '');
         }
@@ -133,8 +160,8 @@ class PageController extends Controller {
 
 
 	/**
+     * @NoCSRFRequired
 	 * @NoAdminRequired
-	 * @NoCSRFRequired
 	 */
 	public function pdfPrint() {
         try{
@@ -161,10 +188,11 @@ class PageController extends Controller {
                 //'table_error_report' =>true,
                 'allow_charset_conversion' => true,
                 //'CSSselectMedia' => 'screen',
-                'author' => 'nextcloud emlviewer'
+                'author' => 'nextcloud '.$this->AppName
             ]);
+            //$mpdf->showImageErrors = true;
             $mpdf->curlAllowUnsafeSslRequests = true;
-            $mpdf->curlTimeout = 1;
+            $mpdf->curlTimeout = 1000;
             $mpdf->setAutoTopMargin = 'stretch';
             $mpdf->setAutoBottomMargin = 'stretch';
             $mpdf->SetDisplayMode('fullwidth', 'single');
@@ -176,19 +204,45 @@ class PageController extends Controller {
 	}
 
     /**
+     * @NoCSRFRequired
+     * @NoAdminRequired
+     * @return mixed
+     * @throws Exception
+     */
+	public function attachment(){
+        if(isset($_GET['att']) && $_GET['att']!=''){
+            $att = intval($_GET['att']);
+        }else{
+            throw new Exception('No attachment id was sent');
+        }
+
+        $message = $this->getMessage();
+        $part = $message->getAttachmentPart($att);
+        if($part){
+            $content = $part->getContent();
+            header("Content-type: ".$part->getHeaderValue('Content-Type'));
+            header("Cache-Control: no-store, no-cache");
+            header('Content-Disposition: attachment; filename="'.self::getPartFilename($part).'"');
+            header('Content-Length: '.mb_strlen($content, '8bit'));
+            echo $content;
+        }
+        return null;
+    }
+
+    /**
      * @return Message
      * @throws Exception
      */
     protected function parseEml(){
         if(isset($_GET['eml_file']) && !empty($_GET['eml_file'])){
-            $eml_file = urldecode($_GET['eml_file']);
+            $this->emlFile = urldecode($_GET['eml_file']);
         }else{
             throw new Exception('No eml file was sent');
         }
 
-        $contents = $this->storage->emlFileContent($eml_file);
+        $contents = $this->storage->emlFileContent($this->emlFile);
         if(!$contents){
-            throw new Exception('Could not load contents of file'.$eml_file);
+            throw new Exception('Could not load contents of file'.$this->emlFile);
         }
 
         $this->message = Message::from($contents);
@@ -206,11 +260,50 @@ class PageController extends Controller {
                 'wrap' => 200);
             $html = $tidy->repairString($html, $config);
         }else{
-            $this->logger->warning('php-tidy was not found on this server. Please install so emlviewer can produce better PDFs.');
+            $this->logger->warning('php-tidy was not found on this server. Please install so '.$this->AppName.' can produce better PDFs.');
         }
-
+        //handle attachment CID urls
+        $atts = $message->getAllAttachmentParts();
+        $urlAttachment = $this->urlGenerator->linkToRoute(
+            $this->AppName.'.page.attachment',
+            array('eml_file' => $this->emlFile,'att'=>''));
+        foreach ($atts as $index => $part) {
+            $attName = self::getPartFilename($part,$index);
+            $attNewSrc = $urlAttachment.$index;
+            $contentType = $part->getHeaderValue('Content-Type');
+            if(stripos($contentType,'image') !==  FALSE){
+                //base64 encode images, for better PDF export support and display performance
+                $content = $part->getContent();
+                $attNewSrc = 'data:'.$contentType.';base64,'.base64_encode($content);
+            }
+            $html = preg_replace('/'.preg_quote('cid:'.$attName).'/ixm',$attNewSrc, $html);
+        }
 	    return $html;
     }
+
+    /**
+     * @param MessagePart $part
+     * @param int $index
+     * @return mixed
+     */
+    protected static function getPartFilename($part,$index = 0)
+    {
+        $contentID = $part->getHeaderValue('Content-ID');
+        if(!$contentID){
+            $contentID = '__unknown_filename'.$index;
+        }
+        $filename = $part->getHeaderParameter(
+            'Content-Type',
+            'name',
+            $part->getHeaderParameter(
+                'Content-Disposition',
+                'filename',
+                $contentID
+            )
+        );
+        return $filename;
+    }
+
     protected function extractTableInTable($element){
         //$doc = $element->ownerDocument;
         $arrTrNodes = Array();
@@ -245,6 +338,6 @@ class PageController extends Controller {
     }
 
 	public function index() {
-		return new TemplateResponse('emlviewer', 'index');  // templates/index.php
+		return new TemplateResponse($this->AppName, 'index');  // templates/index.php
 	}
 }

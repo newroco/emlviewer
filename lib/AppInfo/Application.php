@@ -18,6 +18,8 @@ class Application extends App {
         $policy = new EmptyContentSecurityPolicy();
 
         $policy->addAllowedStyleDomain('\'self\'');
+        $policy->addAllowedStyleDomain('*');
+        $policy->addAllowedFontDomain('*');
         $policy->addAllowedScriptDomain('\'self\'');
 
         $policy->addAllowedImageDomain('*');
