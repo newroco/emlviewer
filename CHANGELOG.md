@@ -1,4 +1,8 @@
 ## 0.0.14 – 2020-06-25
+### Removed
+- Removed some more large ttf files from mpdf
+
+## 0.0.14 – 2020-06-25
 ### Added
 - Text-only e-mail handling
 
