@@ -2,7 +2,7 @@
 ### Added
 - Added headers in PDF and on printer friendly version
 - Added print button on printer friendly version
-- Added ability to shows and download all attachments
+- Added ability to show and download all attachments
 - Added ability to automatically replace embedded image CID urls so they show in the body of the e-mail
 ### Changed
 - php Tidy is now optional, but without it, some emails may not export well to PDF

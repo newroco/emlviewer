@@ -37,7 +37,7 @@ class PageController extends Controller {
      */
     public function getMessage()
     {
-        if($this->message == null){
+        if($this->message === null){
             $this->parseEml();
         }
         return $this->message;
@@ -92,7 +92,7 @@ class PageController extends Controller {
                 array('eml_file' => $this->emlFile));
             $params['urlAttachment'] = $this->urlGenerator->linkToRoute(
                 $this->AppName.'.page.attachment',
-                array('eml_file' => $this->emlFile,'att'=>''));
+                array('eml_file' => $this->emlFile)).'&att=';
             //Headers
             $params['from'] = $message->getHeaderValue('From');
             $params['to'] = $message->getHeaderValue('To');
@@ -210,7 +210,7 @@ class PageController extends Controller {
      * @throws Exception
      */
 	public function attachment(){
-        if(isset($_GET['att']) && $_GET['att']!=''){
+        if(isset($_GET['att']) && $_GET['att'] !==''){
             $att = intval($_GET['att']);
         }else{
             throw new Exception('No attachment id was sent');
@@ -278,6 +278,9 @@ class PageController extends Controller {
             }
             $html = preg_replace('/'.preg_quote('cid:'.$attName).'/ixm',$attNewSrc, $html);
         }
+        if(empty($html)){
+            $html = nl2br($message->getTextContent());
+        }
 	    return $html;
     }
 
@@ -314,18 +317,18 @@ class PageController extends Controller {
             $tbody = $table->getElementsByTagName('tbody');
             if ($tbody->length > 0) {
                 foreach ($tbody->childNodes as $child ) {
-                    if ( $child->nodeName == 'tr' ) {
+                    if ( $child->nodeName === 'tr' ) {
                         $arrTrNodes[] = $child;
                     }
                 }
-                if (count($arrTrNodes) == 1) {
+                if (count($arrTrNodes) === 1) {
                     $tr = $arrTrNodes[0];
                     foreach ($tr->childNodes as $child ) {
-                        if ( $child->nodeName == 'td' ) {
+                        if ( $child->nodeName === 'td' ) {
                             $arrTdNodes[] = $child;
                         }
                     }
-                    if (count($arrTdNodes) == 1) {
+                    if (count($arrTdNodes) === 1) {
                         $td = $arrTdNodes[0];
                         return $this->extractTableInTable($td);
                     }
