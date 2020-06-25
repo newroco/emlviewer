@@ -1,3 +1,7 @@
+## 0.0.14 – 2020-06-25
+### Added
+- Text-only e-mail handling
+
 ## 0.0.13 – 2020-06-24
 ### Added
 - Added headers in PDF and on printer friendly version
