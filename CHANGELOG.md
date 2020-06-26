@@ -1,3 +1,6 @@
+## 0.0.16 – 2020-06-26
+- Repository clean up
+
 ## 0.0.15 – 2020-06-25
 ### Removed
 - Removed some more large ttf files from mpdf
