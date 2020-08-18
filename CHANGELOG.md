@@ -1,5 +1,7 @@
 ## 0.0.16 – 2020-06-26
 - Repository clean up
+### Changed
+- Improved Text-only e-mail handling
 
 ## 0.0.15 – 2020-06-25
 ### Removed
