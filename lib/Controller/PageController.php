@@ -251,6 +251,9 @@ class PageController extends Controller {
 
 	protected function getEmailHTMLContent(Message $message){
         $html = str_replace('"', '\'', $message->getHtmlContent());
+        if(empty($html)){
+            $html = nl2br($message->getTextContent());
+        }
         if(class_exists('tidy')){
             $tidy = new tidy();
             //Specify configuration
@@ -277,9 +280,6 @@ class PageController extends Controller {
                 $attNewSrc = 'data:'.$contentType.';base64,'.base64_encode($content);
             }
             $html = preg_replace('/'.preg_quote('cid:'.$attName).'/ixm',$attNewSrc, $html);
-        }
-        if(empty($html)){
-            $html = nl2br($message->getTextContent());
         }
 	    return $html;
     }
