@@ -1,3 +1,6 @@
+## 0.0.17 – 2020-08-20
+- Adding some fonts to MPDF
+
 ## 0.0.16 – 2020-06-26
 - Repository clean up
 ### Changed
