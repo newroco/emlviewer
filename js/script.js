@@ -64,7 +64,7 @@
 		 */
 		_extendFileActions: function(fileActions) {
 			var self = this;
-			if (isSecureViewerAvailable()) {
+			if (typeof isSecureViewerAvailable !== "undefined" && isSecureViewerAvailable()) {
 				return;
 			}
 			fileActions.registerAction({
