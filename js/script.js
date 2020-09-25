@@ -26,10 +26,10 @@
 			$(".icon-close").click(function(){ $("#app-sidebar").remove(); });
 		},
 		/**
-		 * @param fileName
+		 * @param filePath
 		 */
-		displayParsedEmail: function(fileName) {
-			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}', {file: fileName});
+		displayParsedEmail: function(filePath) {
+			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}', {file: filePath});
 			$.ajax({
 				async: false,
 				method: 'GET',
@@ -51,11 +51,11 @@
 		},
 
 		/**
-		 * @param fileName
+		 * @param filePath
 		 */
-		show: function(fileName) {
+		show: function(filePath) {
 			this.bringInSidebar();
-			this.displayParsedEmail(fileName);
+			this.displayParsedEmail(filePath);
 		},
 
 		/**

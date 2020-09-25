@@ -235,7 +235,7 @@ class PageController extends Controller {
      */
     protected function parseEml(){
         if(isset($_GET['eml_file']) && !empty($_GET['eml_file'])){
-            $this->emlFile = urldecode($_GET['eml_file']);
+            $this->emlFile = $_GET['eml_file'];
         }else{
             throw new Exception('No eml file was sent');
         }
