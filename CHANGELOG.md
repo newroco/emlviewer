@@ -1,3 +1,6 @@
+## 0.0.18 – 2020-09-25
+- Fixed issues with folder names containing + 
+
 ## 0.0.17 – 2020-08-20
 - Adding some fonts to MPDF
 
