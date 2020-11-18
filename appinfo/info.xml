@@ -5,7 +5,7 @@
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
     <description><![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
-    <version>0.0.20</version>
+    <version>0.0.21</version>
     <licence>agpl</licence>
     <author mail="hello@newro.co" >newroco</author>
     <namespace>EmlViewer</namespace>
@@ -14,6 +14,6 @@
     <bugs>https://github.com/newroco/emlviewer/issues</bugs>
     <repository type="git">https://github.com/newroco/emlviewer.git</repository>
     <dependencies>
-        <nextcloud min-version="15" max-version="20"/>
+        <nextcloud min-version="15" max-version="19"/>
     </dependencies>
 </info>

@@ -4,14 +4,11 @@ namespace OCA\EmlViewer\AppInfo;
 
 use Exception;
 use OCP\AppFramework\App;
-use OCP\AppFramework\Bootstrap\IBootstrap;
-use OCP\AppFramework\Bootstrap\IBootContext;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
 use OCP\Util;
 use \OCA\EmlViewer\Storage\AuthorStorage;
 
-class Application extends App implements IBootstrap{
+class Application extends App {
 
     const APP_ID = 'emlviewer';
 
@@ -46,26 +43,16 @@ class Application extends App implements IBootstrap{
          */
         $container = $this->getContainer();
         $container->registerService('AuthorStorage', function($c) {
-            return new AuthorStorage($c->get('RootStorage'));
+            return new AuthorStorage($c->query('RootStorage'));
         });
 
         $container->registerService('RootStorage', function($c) {
-            return $c->get('ServerContainer')->getUserFolder();
+            return $c->query('ServerContainer')->getUserFolder();
         });
 
     }
-    public function register(IRegistrationContext $context): void {
-        // ... registration logic goes here ...
-
-        if ((@include_once __DIR__ . '/../../vendor/autoload.php')===false) {
-            throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
-        }
-
+    public function register(){
         $this->registerScripts();
-    }
-
-    public function boot(IBootContext $context): void {
-        // ... boot logic goes here ...
     }
 
 
