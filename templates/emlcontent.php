@@ -17,7 +17,7 @@ if(!empty($_['attachments']) && count($_['attachments']) > 0) {
 
 <div class="buttonWrapper">
     <?php if(!empty($_['textContent'])) { ?>
-        <button type="button" style="width: 150px;" id="toggle-text-content">Show raw text content</button>
+        <button type="button" style="width: 15em;" id="toggle-text-content">Show raw text content</button>
      <?php } ?>
     <a href="<?php p($_['urlPdf']) ?>" id="make-pdf" target="_blank"><button type="button" style="width: 150px;" >Download as PDF</button></a>
     <a href="<?php p($_['urlPrinter']) ?>" id="printer-friendly" target="_blank"><button type="button" style="width: 250px;" >Printer friendly version</button></a>

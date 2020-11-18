@@ -1,3 +1,6 @@
+## 0.0.19 – 2020-11-18
+- Upgraded to work on NC20 and fixed any deprecation issues 
+
 ## 0.0.18 – 2020-09-25
 - Fixed issues with folder names containing + 
 

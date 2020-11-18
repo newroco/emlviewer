@@ -16,7 +16,7 @@
 		},
 
 		bringInSidebar: function() {
-			var defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
+			let defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
 			defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
 
 			$("#app-sidebar").remove();
@@ -45,7 +45,8 @@
 					}
 				},
 				error: function(response) {
-					$(".mail-content").html('Could not load data from server. Error: ' + response);
+					$(".mail-content").html('Could not load data from server. ' + $(response.responseText).find('.error').html());
+					console.log(response);
 				}
 			});
 		},

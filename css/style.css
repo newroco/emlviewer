@@ -1,7 +1,15 @@
 li[data-id='emlviewer'] {
     display: none !important;
 }
-
+#app-sidebar .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.5;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+}
 .fade-out {
 	display: none;
 }
