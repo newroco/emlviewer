@@ -1,15 +1,7 @@
 li[data-id='emlviewer'] {
     display: none !important;
 }
-#app-sidebar .close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    opacity: 0.5;
-    z-index: 1;
-    width: 44px;
-    height: 44px;
-}
+
 .fade-out {
 	display: none;
 }
@@ -20,14 +12,21 @@ li[data-id='emlviewer'] {
 }
 #app-sidebar.emlviewer {
     position: fixed;
-    /*z-index: 999999;*/
     width: 100%;
     max-width: none;
-    /*top: 0;*/
     left: 0;
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0);
+}
+#app-sidebar .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.5;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
 }
 .emlviewer .overlay {
     position: fixed;
@@ -37,7 +36,7 @@ li[data-id='emlviewer'] {
     height: 100vh;
     top: 0;
     left: 0;
-    background-color: rgba(255, 255, 255, 0.91);
+    background-color: rgba(255, 255, 255, 1);
     -webkit-filter: blur(0px);
     -moz-filter: blur(0px);
     -o-filter: blur(0px);

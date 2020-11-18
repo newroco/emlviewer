@@ -15,6 +15,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
 use OCA\EmlViewer\Storage\AuthorStorage;
+use OCP\Share\IManager;
 use \OCP\Files\NotFoundException;
 use \OCP\ILogger;
 
@@ -27,6 +28,7 @@ class PageController extends Controller {
     private $logger;
 	private $userId;
     private $storage;
+    private $shareManager;
     private $message;
     private $urlGenerator;
     private $emlFile;
@@ -49,14 +51,17 @@ class PageController extends Controller {
      * @param IRequest $request
      * @param $UserId
      * @param AuthorStorage $AuthorStorage
+     * @param IManager $shareManager
      */
 	public function __construct($AppName, IRequest $request, $UserId,
                                 AuthorStorage $AuthorStorage,
+                                IManager $shareManager,
                                 ILogger $logger,
                                 IURLGenerator $urlGenerator){
 		parent::__construct($AppName, $request);
 		$this->AppName = $AppName;
         $this->storage = $AuthorStorage;
+        $this->shareManager = $shareManager;
 		$this->userId = $UserId;
 		$this->logger = $logger;
 		$this->message = null;
@@ -160,6 +165,7 @@ class PageController extends Controller {
 
 
 	/**
+     * @PublicPage
      * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
@@ -239,8 +245,23 @@ class PageController extends Controller {
         }else{
             throw new Exception('No eml file was sent');
         }
+        $count = 0;
+        $shareToken = preg_replace("/(?:\/index\.php)?\/s\/([A-Za-z0-9]{15})\/download.*/", "$1", $this->emlFile, 1,$count);
+        if ($count === 1) {
+            /* shared file or directory */
+            $node = $this->shareManager->getShareByToken($shareToken)->getNode();
+            $type = $node->getType();
 
-        $contents = $this->storage->emlFileContent($this->emlFile);
+            /* shared directory, need file path to continue, */
+            if ($type !== \OCP\Files\FileInfo::TYPE_FOLDER) {
+                $extension = strtolower($node->getExtension());
+                if($extension == 'eml'){
+                    $contents = $node->getContent();
+                }
+            }
+        }else {
+            $contents = $this->storage->emlFileContent($this->emlFile);
+        }
         if(!$contents){
             throw new Exception('Could not load contents of file'.$this->emlFile);
         }

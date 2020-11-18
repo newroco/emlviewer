@@ -1,3 +1,9 @@
+## 0.0.20 – 2020-11-18
+### Added
+- Added support for when sharing file 
+### Changed
+- Made overlay solid white to prevent eye strain
+
 ## 0.0.19 – 2020-11-18
 - Upgraded to work on NC20 and fixed any deprecation issues 
 

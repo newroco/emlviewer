@@ -87,3 +87,12 @@
 
 OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml);
 
+// FIXME: Hack for single public file view since it is not attached to the fileslist
+$(document).ready(function(){
+	if ($('#isPublic').val() && $('#mimetype').val() === 'application/octet-stream' && $('#filename').val().trim().endsWith('.eml')) {
+		var sharingToken = $('#sharingToken').val();
+		var downloadUrl = OC.generateUrl('/s/{token}/download', {token: sharingToken});
+		var viewer = OCA.FilesEmlViewer.PreviewEml;
+		viewer.show(downloadUrl);
+	}
+});

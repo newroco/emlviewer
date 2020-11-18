@@ -3,3 +3,4 @@ package-lock.json
 APP_ID.csr
 emlviewer.key
 vendor
+*.tar.gz

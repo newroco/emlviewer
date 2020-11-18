@@ -76,5 +76,9 @@ class Application extends App implements IBootstrap{
             script(self::APP_ID, 'script');
             style(self::APP_ID, 'style');
         });
+        $eventDispatcher->addListener('OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent', function() {
+            Util::addScript(self::APP_ID, 'script');
+            Util::addStyle(self::APP_ID, 'style');
+        });
     }
 }
