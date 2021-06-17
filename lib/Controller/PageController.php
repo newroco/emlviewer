@@ -240,16 +240,20 @@ class PageController extends Controller {
      * @throws Exception
      */
     protected function parseEml(){
+        $shareToken = null;
+        if(isset($_GET['share_token']) && !empty($_GET['share_token'])) {
+            $shareToken = $_GET['share_token'];
+        }
         if(isset($_GET['eml_file']) && !empty($_GET['eml_file'])){
             $this->emlFile = $_GET['eml_file'];
-        }else{
+        }else if(!$shareToken){
             throw new Exception('No eml file was sent');
         }
-        $count = 0;
-        $shareToken = preg_replace("/(?:\/index\.php)?\/s\/([A-Za-z0-9]{15})\/download.*/", "$1", $this->emlFile, 1,$count);
-        if ($count === 1) {
+
+        if ($shareToken) {
             /* shared file or directory */
-            $node = $this->shareManager->getShareByToken($shareToken)->getNode();
+            $share = $this->shareManager->getShareByToken($shareToken);
+            $node = $share->getNode();
             $type = $node->getType();
 
             /* shared directory, need file path to continue, */
@@ -257,6 +261,12 @@ class PageController extends Controller {
                 $extension = strtolower($node->getExtension());
                 if($extension == 'eml'){
                     $contents = $node->getContent();
+                }
+            }else{//this is a directory
+                $fileNode = $node->get($this->emlFile);
+                $extension = strtolower($fileNode->getExtension());
+                if($extension == 'eml'){
+                    $contents = $fileNode->getContent();
                 }
             }
         }else {

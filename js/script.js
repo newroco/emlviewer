@@ -28,8 +28,8 @@
 		/**
 		 * @param filePath
 		 */
-		displayParsedEmail: function(filePath) {
-			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}', {file: filePath});
+		displayParsedEmail: function(filePath,shareToken) {
+			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&share_token={token}', {file: filePath,token: shareToken});
 			$.ajax({
 				async: false,
 				method: 'GET',
@@ -53,10 +53,11 @@
 
 		/**
 		 * @param filePath
+		 * @param shareToken
 		 */
-		show: function(filePath) {
+		show: function(filePath,shareToken) {
 			this.bringInSidebar();
-			this.displayParsedEmail(filePath);
+			this.displayParsedEmail(filePath,shareToken);
 		},
 
 		/**
@@ -68,6 +69,8 @@
 			if (typeof isSecureViewerAvailable !== "undefined" && isSecureViewerAvailable()) {
 				return;
 			}
+			let sharingToken = $('#sharingToken').val();
+
 			fileActions.registerAction({
 				name: 'view',
 				displayName: 'View',
@@ -75,7 +78,7 @@
 				permissions: OC.PERMISSION_READ,
 				actionHandler: function(fileName, context) {
 					if (fileName.trim().endsWith('.eml')) {
-						self.show(context.dir+'/'+fileName);
+						self.show(context.dir + '/' + fileName,sharingToken);
 					}
 				}
 			});
@@ -91,8 +94,7 @@ OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml);
 $(document).ready(function(){
 	if ($('#isPublic').val() && $('#mimetype').val() === 'application/octet-stream' && $('#filename').val().trim().endsWith('.eml')) {
 		var sharingToken = $('#sharingToken').val();
-		var downloadUrl = OC.generateUrl('/s/{token}/download', {token: sharingToken});
 		var viewer = OCA.FilesEmlViewer.PreviewEml;
-		viewer.show(downloadUrl);
+		viewer.show('',sharingToken);//single shares don't require file path
 	}
 });

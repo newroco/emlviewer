@@ -1,3 +1,9 @@
+## 0.0.22 – 2020-11-18
+Upgraded to work on NC21
+
+## 0.0.21 – 2020-11-18
+Downgraded to work on NC19
+
 ## 0.0.20 – 2020-11-18
 ### Added
 - Added support for when sharing file 
