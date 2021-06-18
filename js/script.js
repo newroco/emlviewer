@@ -29,6 +29,9 @@
 		 * @param filePath
 		 */
 		displayParsedEmail: function(filePath,shareToken) {
+			if(!shareToken){
+				shareToken = '';
+			}
 			const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&share_token={token}', {file: filePath,token: shareToken});
 			$.ajax({
 				async: false,
