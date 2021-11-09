@@ -276,7 +276,7 @@ class PageController extends Controller {
             throw new Exception('Could not load contents of file'.$this->emlFile);
         }
 
-        $this->message = Message::from($contents);
+        $this->message = Message::from($contents,true);
         return $this->message;
     }
 
