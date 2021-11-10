@@ -122,32 +122,36 @@ class PageController extends Controller {
 
                 $whatToInsertBefore = null;
 
-                $doc = new DOMDocument();
-                $doc->loadHTML($params['htmlContent']);
+                if($params['htmlContent']) {
+                    $doc = new DOMDocument();
+                    $doc->loadHTML($params['htmlContent']);
 
-                //fix usual e-mail table in table pattern
-               /* $table = $doc->getElementsByTagName('table');
-                if($table->length > 0) {
-                    $table = $table->item(0);
-                    $innerTable = $this->extractTableInTable($table);
-                    if ($table !== $innerTable) {
-                        //$innerTable2 = $innerTable->cloneNode(true);
-                        //$table->parentNode->appendChild($innerTable2);
-                        //$table->parentNode->removeChild($table);
-                        //$whatToInsertBefore = $innerTable2;
-                        $whatToInsertBefore = $innerTable;
+                    //fix usual e-mail table in table pattern
+                    /* $table = $doc->getElementsByTagName('table');
+                     if($table->length > 0) {
+                         $table = $table->item(0);
+                         $innerTable = $this->extractTableInTable($table);
+                         if ($table !== $innerTable) {
+                             //$innerTable2 = $innerTable->cloneNode(true);
+                             //$table->parentNode->appendChild($innerTable2);
+                             //$table->parentNode->removeChild($table);
+                             //$whatToInsertBefore = $innerTable2;
+                             $whatToInsertBefore = $innerTable;
+                         }
+                     }*/
+
+                    $fragment = $doc->createDocumentFragment();
+                    $fragment->appendXML($headersHtml);
+                    if (!$whatToInsertBefore) {
+                        $body = $doc->getElementsByTagName('body')->item(0);
+                        $whatToInsertBefore = $body->firstChild;
                     }
-                }*/
+                    $whatToInsertBefore->parentNode->insertBefore($fragment, $whatToInsertBefore);
 
-                $fragment = $doc->createDocumentFragment();
-                $fragment->appendXML($headersHtml);
-                if(!$whatToInsertBefore){
-                    $body = $doc->getElementsByTagName('body')->item(0);
-                    $whatToInsertBefore = $body->firstChild;
+                    $params['htmlContent'] = $doc->saveHTML();
+                }else{
+                    $params['htmlContent'] = 'no content in e-mail body';
                 }
-                $whatToInsertBefore->parentNode->insertBefore($fragment, $whatToInsertBefore);
-
-                 $params['htmlContent'] = $doc->saveHTML();
 
                 $response = new TemplateResponse($this->AppName, 'printcontent', $params, $renderAs = 'blank');  // templates/printcontent.php
             }else {

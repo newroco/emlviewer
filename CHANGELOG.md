@@ -1,3 +1,6 @@
+## 1.0.0 – 2021-11-09
+Upgraded to work on NC22
+
 ## 0.0.22 – 2020-11-18
 Upgraded to work on NC21
 
