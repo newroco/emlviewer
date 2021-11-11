@@ -16,8 +16,9 @@ use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
 use OCA\EmlViewer\Storage\AuthorStorage;
 use OCP\Share\IManager;
-use \OCP\Files\NotFoundException;
-use \OCP\ILogger;
+use OCP\Files\NotFoundException;
+use OCP\ILogger;
+use OCP\AppFramework\Http\Http;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
@@ -124,7 +125,13 @@ class PageController extends Controller {
 
                 if($params['htmlContent']) {
                     $doc = new DOMDocument();
+                    // modify state
+                    $libxml_previous_state = libxml_use_internal_errors(true);
                     $doc->loadHTML($params['htmlContent']);
+                    //ignore HTML errors
+                    libxml_clear_errors();
+                    // restore state
+                    libxml_use_internal_errors($libxml_previous_state);
 
                     //fix usual e-mail table in table pattern
                     /* $table = $doc->getElementsByTagName('table');
@@ -182,6 +189,7 @@ class PageController extends Controller {
 
             $response = $this->emlPrint(true);
             $html = $response->render();
+            $formerErrorReporting = error_reporting(0);
             $mpdf = new Mpdf([
                 'tempDir' => __DIR__ . '/../../tmp',
                 'mode' => 'UTF-8',
@@ -208,8 +216,10 @@ class PageController extends Controller {
             $mpdf->SetDisplayMode('fullwidth', 'single');
             $mpdf->WriteHTML($html);
             $mpdf->Output($filename, 'I');
+            error_reporting($formerErrorReporting);
+            exit;
         } catch (Exception $e) {
-            echo 'Error trying to render pdf: ' . $e->getMessage();
+            return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
         }
 	}
 
