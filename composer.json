@@ -5,11 +5,10 @@
     "license": "AGPL",
     "authors": [
         {
-            "name": "Newroco"
+            "name": "newroco"
         }
     ],
     "require": {
-        "composer/composer": "dev-master",
         "zbateson/mail-mime-parser": "2.0",
         "mpdf/mpdf": "^8.0"
     },

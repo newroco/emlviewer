@@ -22,6 +22,7 @@ use OCP\AppFramework\Http\Http;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
+use ZBateson\MailMimeParser\IMessage;
 use \Mpdf\Mpdf;
 
 
@@ -33,6 +34,7 @@ class PageController extends Controller {
     private $message;
     private $urlGenerator;
     private $emlFile;
+    private $shareToken;
     protected $AppName;
 
     /**
@@ -96,9 +98,7 @@ class PageController extends Controller {
             $params['urlPdf'] = $this->urlGenerator->linkToRoute(
                 $this->AppName.'.page.pdfPrint',
                 array('eml_file' => $this->emlFile));
-            $params['urlAttachment'] = $this->urlGenerator->linkToRoute(
-                $this->AppName.'.page.attachment',
-                array('eml_file' => $this->emlFile)).'&att=';
+            $params['urlAttachment'] = $this->getAttachmentUrlPrefix();
             //Headers
             $params['from'] = $message->getHeaderValue('From');
             $params['to'] = $message->getHeaderValue('To');
@@ -224,6 +224,7 @@ class PageController extends Controller {
 	}
 
     /**
+     * @PublicPage
      * @NoCSRFRequired
      * @NoAdminRequired
      * @return mixed
@@ -250,23 +251,24 @@ class PageController extends Controller {
     }
 
     /**
-     * @return Message
+     * @return IMessage
      * @throws Exception
      */
     protected function parseEml(){
-        $shareToken = null;
+        $this->shareToken = null;
+        $contents = '';
         if(isset($_GET['share_token']) && !empty($_GET['share_token'])) {
-            $shareToken = $_GET['share_token'];
+            $this->shareToken = $_GET['share_token'];
         }
         if(isset($_GET['eml_file']) && !empty($_GET['eml_file'])){
             $this->emlFile = $_GET['eml_file'];
-        }else if(!$shareToken){
+        }else if(!$this->shareToken){
             throw new Exception('No eml file was sent');
         }
 
-        if ($shareToken) {
+        if ($this->shareToken) {
             /* shared file or directory */
-            $share = $this->shareManager->getShareByToken($shareToken);
+            $share = $this->shareManager->getShareByToken($this->shareToken);
             $node = $share->getNode();
             $type = $node->getType();
 
@@ -295,6 +297,7 @@ class PageController extends Controller {
     }
 
 	protected function getEmailHTMLContent(Message $message){
+
         $html = str_replace('"', '\'', $message->getHtmlContent());
         if(empty($html)){
             $html = nl2br($message->getTextContent());
@@ -312,9 +315,7 @@ class PageController extends Controller {
         }
         //handle attachment CID urls
         $atts = $message->getAllAttachmentParts();
-        $urlAttachment = $this->urlGenerator->linkToRoute(
-            $this->AppName.'.page.attachment',
-            array('eml_file' => $this->emlFile,'att'=>''));
+        $urlAttachment = $this->getAttachmentUrlPrefix();
         foreach ($atts as $index => $part) {
             $attName = self::getPartFilename($part,$index);
             $attNewSrc = $urlAttachment.$index;
@@ -383,6 +384,15 @@ class PageController extends Controller {
             $table = null;
         }
         return $table;
+    }
+    private function getAttachmentUrlPrefix(){
+        $urlAttachment = $this->urlGenerator->linkToRoute(
+            $this->AppName.'.page.attachment',
+            array(
+                'eml_file' => $this->emlFile,
+                'share_token' => $this->shareToken
+                )).'&att=';
+        return $urlAttachment;
     }
 
 	public function index() {
