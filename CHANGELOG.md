@@ -1,3 +1,7 @@
+## 1.0.2 – 2022-05-20
+Added ability to access attachments a shared eml file,
+Upgraded version support to NC24
+
 ## 1.0.1 – 2022-03-18
 Upgraded version support to NC23
 
