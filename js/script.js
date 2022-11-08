@@ -80,7 +80,7 @@
 				mime: 'application/octet-stream',
 				permissions: OC.PERMISSION_READ,
 				actionHandler: function(fileName, context) {
-					if (fileName.trim().endsWith('.eml')) {
+					if (fileName.trim().toLowerCase().endsWith('.eml')) {
 						self.show(context.dir + '/' + fileName,sharingToken);
 					}
 				}
@@ -95,7 +95,7 @@ OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml);
 
 // FIXME: Hack for single public file view since it is not attached to the fileslist
 $(document).ready(function(){
-	if ($('#isPublic').val() && $('#mimetype').val() === 'application/octet-stream' && $('#filename').val().trim().endsWith('.eml')) {
+	if ($('#isPublic').val() && $('#mimetype').val() === 'application/octet-stream' && $('#filename').val().trim().toLowerCase().endsWith('.eml')) {
 		var sharingToken = $('#sharingToken').val();
 		var viewer = OCA.FilesEmlViewer.PreviewEml;
 		viewer.show('',sharingToken);//single shares don't require file path
