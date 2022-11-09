@@ -2,6 +2,10 @@
 
 	OCA.FilesEmlViewer = OCA.FilesEmlViewer || {};
 
+	OCA.FilesEmlViewer.toggleText = function(elem,a, b){
+		return elem.text(elem.text() == b ? a : b);
+	}
+
 	/**
 	 * @namespace OCA.FilesEmlViewer.PreviewPlugin
 	 */
@@ -43,7 +47,7 @@
 					if($("#make-pdf").length > 0) {
 						$("#toggle-text-content").click(() => {
 							$("#email-text-content").toggleClass("fade-out");
-							$('#toggle-text-content').toggleText('Show raw content', 'Hide raw content');
+							OCA.FilesEmlViewer.toggleText($('#toggle-text-content'),'Show raw content', 'Hide raw content');
 						});
 					}
 				},

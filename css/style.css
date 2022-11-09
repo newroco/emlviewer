@@ -5,7 +5,7 @@ li[data-id='emlviewer'] {
 .fade-out {
 	display: none;
 }
-#email-html-content{
+.emlviewer_email_html_content{
     width: 100%;
     min-height: 200px;
     height: 100%;
@@ -19,7 +19,7 @@ li[data-id='emlviewer'] {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0);
 }
-#app-sidebar .close {
+#app-sidebar.emlviewer .close {
     position: absolute;
     top: 0;
     right: 0;

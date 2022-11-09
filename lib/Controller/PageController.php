@@ -5,6 +5,7 @@ namespace OCA\EmlViewer\Controller;
 use DOMDocument;
 use Exception;
 
+
 if ((@include_once __DIR__ . '/../../vendor/autoload.php')===false) {
     throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
 }
@@ -14,6 +15,9 @@ use \OCP\IURLGenerator;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Http\NotFoundResponse;
+use OCP\AppFramework\Http\DataDownloadResponse;
 use OCA\EmlViewer\Storage\AuthorStorage;
 use OCP\Share\IManager;
 use OCP\Files\NotFoundException;
@@ -80,7 +84,7 @@ class PageController extends Controller {
      *
      * @return TemplateResponse
 	 */
-	public function emlPrint($print = false){
+	public function emlPrint($print = false): TemplateResponse{
         if(isset($_GET['print'])){
             $print = true;
         }
@@ -176,11 +180,12 @@ class PageController extends Controller {
 
 
 	/**
+     * @return Response
      * @PublicPage
      * @NoCSRFRequired
 	 * @NoAdminRequired
 	 */
-	public function pdfPrint() {
+	public function pdfPrint() : Response {
         try{
             $message = $this->getMessage();
             $from = $message->getHeaderValue('From');
@@ -224,30 +229,21 @@ class PageController extends Controller {
 	}
 
     /**
+     * @param int $att
+     * @return mixed
      * @PublicPage
      * @NoCSRFRequired
      * @NoAdminRequired
-     * @return mixed
-     * @throws Exception
      */
-	public function attachment(){
-        if(isset($_GET['att']) && $_GET['att'] !==''){
-            $att = intval($_GET['att']);
-        }else{
-            throw new Exception('No attachment id was sent');
-        }
-
+	public function attachment(int $att = 0): Response {
+        $att = intval($att);
         $message = $this->getMessage();
         $part = $message->getAttachmentPart($att);
         if($part){
             $content = $part->getContent();
-            header("Content-type: ".$part->getHeaderValue('Content-Type'));
-            header("Cache-Control: no-store, no-cache");
-            header('Content-Disposition: attachment; filename="'.self::getPartFilename($part).'"');
-            header('Content-Length: '.mb_strlen($content, '8bit'));
-            echo $content;
+            return new DataDownloadResponse($content,self::getPartFilename($part),$part->getHeaderValue('Content-Type'));
         }
-        return null;
+        return new NotFoundResponse();
     }
 
     /**
@@ -395,7 +391,7 @@ class PageController extends Controller {
         return $urlAttachment;
     }
 
-	public function index() {
+	public function index() : TemplateResponse{
 		return new TemplateResponse($this->AppName, 'index');  // templates/index.php
 	}
 }

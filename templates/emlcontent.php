@@ -32,7 +32,7 @@ if(!empty($_['attachments']) && count($_['attachments']) > 0) {
 <?php if(!empty($_['htmlContent'])) { ?>
 
     <iframe
-        id="email-html-content"
+        class="emlviewer_email_html_content"
         srcdoc="<?php p($_['htmlContent']) ?>"
     ></iframe>
 
