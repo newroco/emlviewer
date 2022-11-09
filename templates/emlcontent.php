@@ -9,7 +9,7 @@
 if(!empty($_['attachments']) && count($_['attachments']) > 0) {
     echo '<p>Attachments: ';
     foreach($_['attachments'] as $ind => $filename){
-        echo '<a class="attachment" href="'.$_['urlAttachment'].$ind.'">'.$filename.'</a>';
+        echo '<a href="'.$_['urlAttachment'].$ind.'"><button type="button" >'.$filename.'</button></a>';
     }
     echo '</p>';
 }
@@ -23,7 +23,7 @@ if(!empty($_['attachments']) && count($_['attachments']) > 0) {
     <a href="<?php p($_['urlPrinter']) ?>" id="printer-friendly" target="_blank"><button type="button" style="width: 250px;" >Printer friendly version</button></a>
 </div>
 <?php if(!empty($_['textContent'])) { ?>
-    <div id="email-text-content" class="fade-out">
+    <div class="emlviewer_email_text_content fade-out">
         Message:<br/>
         <?php p($_['textContent']) ?>
     </div>

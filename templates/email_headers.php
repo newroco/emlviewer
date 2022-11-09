@@ -1,6 +1,6 @@
 ﻿<style>
     /* show print button only in browser */
-    #email-headers p{
+    .emlviewer_email_headers p{
         visibility: visible !important;
     }
 </style>
@@ -10,7 +10,7 @@
         el.onclick = function(){window.print();}
     });
 </script>
-<table id="email-headers" >
+<table class="emlviewer_email_headers" >
     <tr><td style="text-align:left;padding: 2px 5px; font-size: 14px;" align="left">
             <p style="visibility:hidden"><button id="printButton">print</button></p>
         <p>From: <strong><?php p($_['from']) ?></strong></p>
