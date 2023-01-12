@@ -18,11 +18,12 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\DataDownloadResponse;
+use OCP\AppFramework\Http\DataResponse;
 use OCA\EmlViewer\Storage\AuthorStorage;
 use OCP\Share\IManager;
 use OCP\Files\NotFoundException;
 use OCP\ILogger;
-use OCP\AppFramework\Http\Http;
+use OCP\AppFramework\Http;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
