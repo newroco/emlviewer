@@ -90,6 +90,17 @@
 				}
 			});
 			fileActions.setDefault('application/octet-stream', 'view');
+
+			fileActions.registerAction({
+				name: 'view',
+				displayName: 'View',
+				mime: 'message/rfc822',
+				permissions: OC.PERMISSION_READ,
+				actionHandler: function(fileName, context) {
+					self.show(context.dir + '/' + fileName,sharingToken);
+				}
+			});
+			fileActions.setDefault('message/rfc822', 'view');
 		}
 	};
 
