@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     /* show print button only in browser */
     .emlviewer_email_headers p{
         visibility: visible !important;

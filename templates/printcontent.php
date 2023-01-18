@@ -1,1 +1,1 @@
-﻿<?php print_unescaped($_['htmlContent']) ?>
+<?php print_unescaped($_['htmlContent']) ?>

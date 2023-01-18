@@ -1,4 +1,4 @@
-﻿﻿<?php
+<?php
     /** @var array $_ */
 ?>
 <p>From: <strong><?php p($_['from']) ?></strong></p>
