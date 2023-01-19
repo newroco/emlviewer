@@ -6,7 +6,7 @@
     <summary>Preview eml files</summary>
     <description>
         <![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <licence>agpl</licence>
     <author mail="hello@newro.co">newroco</author>
     <namespace>EmlViewer</namespace>

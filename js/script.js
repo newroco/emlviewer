@@ -20,7 +20,7 @@
         },
 
         bringInSidebar: function () {
-            let defaultHtml = '<div class="overlay"></div><a class="close icon-close" href="#"></a>';
+            let defaultHtml = '<span class="close icon-close"></span>';
             defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
 
             $("#app-sidebar").remove();

@@ -1,3 +1,8 @@
+## 1.0.5 – 2023-01-19
+Added support for NC25,
+Added support for mime 'message/rfc822',
+Various bug fixes and header encoding fixes
+
 ## 1.0.4 – 2022-11-09
 Better handling NC global theme, e.g dark mode
 

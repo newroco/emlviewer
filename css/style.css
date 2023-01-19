@@ -23,29 +23,28 @@ li[data-id='emlviewer'] {
 }
 
 #app-sidebar.emlviewer .close {
+    cursor: pointer;
     position: absolute;
     top: 0;
     right: 0;
-    opacity: 0.5;
     z-index: 1;
+}
+#app-sidebar.emlviewer .icon-close {
+    display: block;
     width: 44px;
     height: 44px;
 }
-
-.emlviewer .overlay {
-    position: fixed;
+span.close.icon-close::before {
+    background: var(--color-background-darker);
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
     z-index: -1;
-    max-width: none;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    background-color: var(--color-main-background);
-    -webkit-filter: blur(0px);
-    -moz-filter: blur(0px);
-    -o-filter: blur(0px);
-    -ms-filter: blur(0px);
-    filter: blur(0px);
+    opacity: 0.3;
+}
+span.close.icon-close:hover::before {
+    content: '';
 }
 
 .emlviewer .mail-content {
