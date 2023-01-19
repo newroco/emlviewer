@@ -1,4 +1,5 @@
 <?php
+
 namespace OCA\EmlViewer\Storage;
 
 use Exception;
@@ -10,14 +11,16 @@ class AuthorStorage
 {
     private $storage;
 
-    public function __construct($myStorage){
+    public function __construct($myStorage)
+    {
         $this->storage = $myStorage;
     }
 
-    public function emlFileContent($filePath){
+    public function emlFileContent($filePath)
+    {
         try {
             $file = $this->storage->get($filePath);
-            if($file){
+            if ($file) {
                 return $file->getContent();
             }
         } catch (Exception $e) {

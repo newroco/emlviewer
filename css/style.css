@@ -3,14 +3,16 @@ li[data-id='emlviewer'] {
 }
 
 .fade-out {
-	display: none;
+    display: none;
 }
-.emlviewer_email_html_content{
+
+.emlviewer_email_html_content {
     width: 100%;
     min-height: 200px;
     height: 100%;
-    background-color: rgba(255,255,255,0.7);
+    background-color: rgba(255, 255, 255, 0.7);
 }
+
 #app-sidebar.emlviewer {
     position: fixed;
     width: 100%;
@@ -19,6 +21,7 @@ li[data-id='emlviewer'] {
     right: 0;
     bottom: 0;
 }
+
 #app-sidebar.emlviewer .close {
     position: absolute;
     top: 0;
@@ -28,6 +31,7 @@ li[data-id='emlviewer'] {
     width: 44px;
     height: 44px;
 }
+
 .emlviewer .overlay {
     position: fixed;
     z-index: -1;
@@ -43,6 +47,7 @@ li[data-id='emlviewer'] {
     -ms-filter: blur(0px);
     filter: blur(0px);
 }
+
 .emlviewer .mail-content {
     display: flex;
     height: 98%;
@@ -54,6 +59,7 @@ li[data-id='emlviewer'] {
     width: 100%;
     flex-direction: column;
 }
+
 .emlviewer .emlviewer_email_headers {
     padding: 2px 5px;
     font-size: 14px;

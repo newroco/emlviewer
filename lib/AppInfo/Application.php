@@ -11,11 +11,13 @@ use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
 use OCP\Util;
 use \OCA\EmlViewer\Storage\AuthorStorage;
 
-class Application extends App implements IBootstrap{
+class Application extends App implements IBootstrap
+{
 
     const APP_ID = 'emlviewer';
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(self::APP_ID);
 
         $manager = \OC::$server->getContentSecurityPolicyManager();
@@ -45,40 +47,42 @@ class Application extends App implements IBootstrap{
          * Storage Layer
          */
         $container = $this->getContainer();
-        $container->registerService('AuthorStorage', function($c) {
+        $container->registerService('AuthorStorage', function ($c) {
             return new AuthorStorage($c->get('RootStorage'));
         });
 
-        $container->registerService('RootStorage', function($c) {
+        $container->registerService('RootStorage', function ($c) {
             return $c->get('ServerContainer')->getUserFolder();
         });
 
     }
-    public function register(IRegistrationContext $context): void {
+
+    public function register(IRegistrationContext $context): void
+    {
         // ... registration logic goes here ...
 
-        if ((@include_once __DIR__ . '/../../vendor/autoload.php')===false) {
+        if ((@include_once __DIR__ . '/../../vendor/autoload.php') === false) {
             throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
         }
 
         $this->registerScripts();
     }
 
-    public function boot(IBootContext $context): void {
-        // ... boot logic goes here ...
-    }
-
-
     protected function registerScripts()
     {
         $eventDispatcher = \OC::$server->getEventDispatcher();
-        $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
+        $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
             script(self::APP_ID, 'script');
             style(self::APP_ID, 'style');
         });
-        $eventDispatcher->addListener('OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent', function() {
+        $eventDispatcher->addListener('OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent', function () {
             Util::addScript(self::APP_ID, 'script');
             Util::addStyle(self::APP_ID, 'style');
         });
+    }
+
+    public function boot(IBootContext $context): void
+    {
+        // ... boot logic goes here ...
     }
 }

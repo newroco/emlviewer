@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
-<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>emlviewer</id>
     <name>Eml Viewer</name>
     <summary>Preview eml files</summary>
-    <description><![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
+    <description>
+        <![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
     <version>1.0.4</version>
     <licence>agpl</licence>
-    <author mail="hello@newro.co" >newroco</author>
+    <author mail="hello@newro.co">newroco</author>
     <namespace>EmlViewer</namespace>
     <category>files</category>
     <website>https://github.com/newroco/emlviewer</website>

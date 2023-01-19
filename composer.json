@@ -1,18 +1,18 @@
 {
-    "name": "newroco/eml-viewer",
-    "description": "Preview eml files",
-    "type": "project",
-    "license": "AGPL",
-    "authors": [
-        {
-            "name": "newroco"
-        }
-    ],
-    "require": {
-        "zbateson/mail-mime-parser": "2.0",
-        "mpdf/mpdf": "^8.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "*"
+  "name": "newroco/eml-viewer",
+  "description": "Preview eml files",
+  "type": "project",
+  "license": "AGPL",
+  "authors": [
+    {
+      "name": "newroco"
     }
+  ],
+  "require": {
+    "zbateson/mail-mime-parser": "2.0",
+    "mpdf/mpdf": "^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  }
 }
