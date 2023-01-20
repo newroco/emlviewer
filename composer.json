@@ -9,8 +9,8 @@
     }
   ],
   "require": {
-    "zbateson/mail-mime-parser": "2.0",
-    "mpdf/mpdf": "^8.0"
+    "zbateson/mail-mime-parser": "2.2.3",
+    "mpdf/mpdf": "^8.1"
   },
   "require-dev": {
     "phpunit/phpunit": "*"

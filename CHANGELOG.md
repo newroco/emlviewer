@@ -1,3 +1,6 @@
+## 1.0.7 – 2023-01-20
+Upgrade to zbateson/mail-mime-parser otherwise fails to load mail preview on php8   
+
 ## 1.0.6 – 2023-01-20
 Fixed php8 loaded vendor and restricted to NC24 and above  
 
