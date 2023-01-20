@@ -1,3 +1,6 @@
+## 1.0.6 – 2023-01-20
+Fixed php8 loaded vendor and restricted to NC24 and above  
+
 ## 1.0.5 – 2023-01-19
 Added support for NC25,
 Added support for mime 'message/rfc822',

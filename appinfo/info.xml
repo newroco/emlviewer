@@ -6,7 +6,7 @@
     <summary>Preview eml files</summary>
     <description>
         <![CDATA[Provides an email preview functionality. It creates preview for the .eml files and displays it as a modal.]]></description>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <licence>agpl</licence>
     <author mail="hello@newro.co">newroco</author>
     <namespace>EmlViewer</namespace>
@@ -17,6 +17,6 @@
     <dependencies>
         <php min-version="7.4" min-int-size="64"/>
         <lib>mbstring</lib>
-        <nextcloud min-version="20" max-version="25"/>
+        <nextcloud min-version="24" max-version="25"/>
     </dependencies>
 </info>
