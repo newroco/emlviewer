@@ -321,7 +321,11 @@ class PageController extends Controller
             }
             $html = preg_replace('/' . preg_quote('cid:' . $attName) . '/ixm', $attNewSrc, $html);
         }
-        return $html;
+        if(function_exists('mb_convert_encoding')){
+            return mb_convert_encoding($html, 'html-entities', 'UTF-8');
+        } else {
+            return $html;
+        }
     }
 
     /**
