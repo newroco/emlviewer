@@ -14,12 +14,9 @@ li[data-id='emlviewer'] {
 }
 
 #app-sidebar.emlviewer {
-    position: fixed;
+    position: unset;
     width: 100%;
     max-width: none;
-    left: 0;
-    right: 0;
-    bottom: 0;
 }
 
 #app-sidebar.emlviewer .close {
@@ -48,12 +45,13 @@ span.close.icon-close:hover::before {
 }
 
 .emlviewer .mail-content {
+    position: relative;
     display: flex;
     height: 98%;
     margin-left: auto;
     margin-right: auto;
     text-align: left;
-    padding-left: 25px;
+    padding-left: 50px;
     padding-right: 25px;
     width: 100%;
     flex-direction: column;
