@@ -4,4 +4,3 @@ APP_ID.csr
 emlviewer.key
 vendor
 *.tar.gz
-composer.lock

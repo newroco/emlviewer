@@ -1,3 +1,7 @@
+## 1.0.9 – 2023-02-07
+Upgraded dependencies.
+Fixed composer and PSR version included in vendor folder.
+
 ## 1.0.8 – 2023-09-01
 Upgraded version support to NC26, NC27
 - Fixed CSS styles for 25-27
