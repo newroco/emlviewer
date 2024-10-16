@@ -9,6 +9,9 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
 use OCP\Util;
+use OCP\EventDispatcher\IEventDispatcher;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
 use \OCA\EmlViewer\Storage\AuthorStorage;
 
 class Application extends App implements IBootstrap
@@ -70,12 +73,13 @@ class Application extends App implements IBootstrap
 
     protected function registerScripts()
     {
-        $eventDispatcher = \OC::$server->getEventDispatcher();
-        $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
-            script(self::APP_ID, 'script');
-            style(self::APP_ID, 'style');
+        $eventDispatcher = \OC::$server->get(IEventDispatcher::class);
+        $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+            Util::addScript(self::APP_ID, 'script');
+            Util::addStyle(self::APP_ID, 'style');
         });
-        $eventDispatcher->addListener('OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent', function () {
+
+        $eventDispatcher->addListener(BeforeTemplateRenderedEvent::class, function () {
             Util::addScript(self::APP_ID, 'script');
             Util::addStyle(self::APP_ID, 'style');
         });
