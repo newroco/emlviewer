@@ -1,123 +1,187 @@
-(function (OCA) {
+/* eslint-disable jsdoc/require-param-description */
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
+// import { registerFileAction, getFileActions } from '@nextcloud/files'
 
-    OCA.FilesEmlViewer = OCA.FilesEmlViewer || {};
+(function(OCA) {
 
-    OCA.FilesEmlViewer.toggleText = function (elem, a, b) {
-        return elem.text(elem.text() == b ? a : b);
-    };
+	OCA.FilesEmlViewer = OCA.FilesEmlViewer || {}
 
-    /**
-     * @namespace OCA.FilesEmlViewer.PreviewPlugin
-     */
-    OCA.FilesEmlViewer.PreviewEml = {
+	OCA.FilesEmlViewer.toggleText = function(elem, a, b) {
 
-        _baseUrl: '/apps/emlviewer',
-        /**
-         * @param fileList
-         */
-        attach: function (fileList) {
-            this._extendFileActions(fileList.fileActions);
-        },
+		elem.textContent = elem.textContent === b ? a : b
+	}
 
-        bringInSidebar: function () {
-            let defaultHtml = '<span class="close icon-close"></span>';
-            defaultHtml += '<div class="mail-content"><br/><br/>Preparing preview... please wait.</div>';
+	/**
+	 * @namespace OCA.FilesEmlViewer.PreviewPlugin
+	 */
 
-            $("#app-sidebar").remove();
-            $("#app-content").after('<div id="app-sidebar" class="emlviewer"></div>');
-            $("#app-sidebar").html(defaultHtml);
-            $(".icon-close").unbind();
-            $(".icon-close").click(function () {
-                $("#app-sidebar").remove();
-            });
-        },
-        /**
-         * @param filePath
-         */
-        displayParsedEmail: function (filePath, shareToken) {
-            if (!shareToken) {
-                shareToken = '';
-            }
-            const parserUrl = OC.generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&share_token={token}', {
-                file: filePath,
-                token: shareToken
-            });
-            $.ajax({
-                async: false,
-                method: 'GET',
-                url: parserUrl,
-                success: function (response, e) {
-                    $(".mail-content").html(response);
+	OCA.FilesEmlViewer.PreviewEml = {
 
-                    if ($("#make-pdf").length > 0) {
-                        $("#toggle-text-content").click(() => {
-                            $(".emlviewer_email_text_content").toggleClass("fade-out");
-                            OCA.FilesEmlViewer.toggleText($('#toggle-text-content'), 'Show raw content', 'Hide raw content');
-                        });
-                    }
-                },
-                error: function (response) {
-                    $(".mail-content").html('Could not load data from server. ' + $(response.responseText).find('.error').html());
-                    console.log(response);
-                }
-            });
-        },
+		_baseUrl: '/apps/emlviewer',
 
-        /**
-         * @param filePath
-         * @param shareToken
-         */
-        show: function (filePath, shareToken) {
-            this.bringInSidebar();
-            this.displayParsedEmail(filePath, shareToken);
-        },
+		/**
+		 * @param fileList
+		 */
 
-        /**
-         * @param fileActions
-         * @private
-         */
-        _extendFileActions: function (fileActions) {
-            var self = this;
-            if (typeof isSecureViewerAvailable !== "undefined" && isSecureViewerAvailable()) {
-                return;
-            }
-            let sharingToken = $('#sharingToken').val();
+		attach(fileList) {
+			this._extendFileActions(fileList.fileActions)
+		},
 
-            fileActions.registerAction({
-                name: 'view',
-                displayName: 'View',
-                mime: 'application/octet-stream',
-                permissions: OC.PERMISSION_READ,
-                actionHandler: function (fileName, context) {
-                    if (fileName.trim().toLowerCase().endsWith('.eml')) {
-                        self.show(context.dir + '/' + fileName, sharingToken);
-                    }
-                }
-            });
-            fileActions.setDefault('application/octet-stream', 'view');
+		bringInSidebar() {
+			const defaultHtml = `
+                <span class="close icon-close"></span>
+                <div class="mail-content"><br/><br/>Preparing preview... please wait.</div>
+            `
 
-            fileActions.registerAction({
-                name: 'view',
-                displayName: 'View',
-                mime: 'message/rfc822',
-                permissions: OC.PERMISSION_READ,
-                actionHandler: function (fileName, context) {
-                    self.show(context.dir + '/' + fileName, sharingToken);
-                }
-            });
-            fileActions.setDefault('message/rfc822', 'view');
-        }
-    };
+			const appSidebar = document.getElementById('app-sidebar')
 
-})(OCA);
+			if (appSidebar) {
 
-OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml);
+				appSidebar.remove()
+			}
 
-// FIXME: Hack for single public file view since it is not attached to the fileslist
-$(document).ready(function () {
-    if ($('#isPublic').val() && $('#mimetype').val() === 'application/octet-stream' && $('#filename').val().trim().toLowerCase().endsWith('.eml')) {
-        var sharingToken = $('#sharingToken').val();
-        var viewer = OCA.FilesEmlViewer.PreviewEml;
-        viewer.show('', sharingToken);//single shares don't require file path
-    }
-});
+			const appContent = document.getElementById('app-content')
+
+			const newSidebar = document.createElement('div')
+			newSidebar.id = 'app-sidebar'
+			newSidebar.className = 'emlviewer'
+			newSidebar.innerHTML = defaultHtml
+			appContent.after(newSidebar)
+
+			const closeIcon = document.querySelector('.icon-close')
+
+			if (closeIcon) {
+				closeIcon.addEventListener('click', () => {
+
+					newSidebar.remove()
+				})
+			}
+		},
+
+		/**
+		 * @param filePath
+		 */
+
+		displayParsedEmail(filePath, shareToken = '') {
+			const parserUrl = generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&share_token={token}', {
+				file: filePath,
+				token: shareToken,
+			})
+			axios.get(parserUrl)
+				.then((response) => {
+					const mailContentElement = document.querySelector('.mail-content')
+					if (mailContentElement) {
+						mailContentElement.innerHTML = response.data
+					}
+
+					const makePdfElement = document.getElementById('make-pdf')
+					if (makePdfElement) {
+						const toggleTextContentButton = document.getElementById('toggle-text-content')
+
+						toggleTextContentButton.addEventListener('click', () => {
+
+							const emailTextContentElement = document.querySelector('.emlviewer_email_text_content')
+							if (emailTextContentElement) {
+								emailTextContentElement.classList.toggle('fade-out')
+							}
+							OCA.FilesEmlViewer.toggleText(toggleTextContentButton, 'Show raw content', 'Hide raw content')
+						})
+
+					}
+				})
+				.catch((error) => {
+
+					const mailContentElement = document.querySelector('.mail-content')
+
+					if (mailContentElement) {
+						mailContentElement.innerHTML = 'Could not load data from server.'
+					}
+					console.error(error)
+				})
+		},
+
+		/**
+		 *
+		 * @param {string} filePath
+		 * @param {string} [shareToken]
+		 */
+		show(filePath, shareToken) {
+			this.bringInSidebar()
+			this.displayParsedEmail(filePath, shareToken)
+
+		},
+
+		/**
+		 *
+		 * @param {object} fileActions
+		 *
+		 */
+		_extendFileActions(fileActions) {
+
+			if (typeof isSecureViewerAvailable !== 'undefined' && isSecureViewerAvailable()) {
+				return
+			}
+
+			const sharingToken = document.getElementById('sharingToken') ? document.getElementById('sharingToken').value : ''
+
+			fileActions.registerAction({
+				name: 'view',
+				displayName: t('emlviewer', 'View'),
+				mime: 'application/octet-stream',
+				permissions: OC.PERMISSION_READ,
+				actionHandler(fileName, context, event) {
+					event.preventDefault()
+					if (fileName.trim().toLowerCase().endsWith('.eml')) {
+						OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, sharingToken)
+					}
+
+				},
+			})
+
+			fileActions.setDefault('application/octet-stream', 'view')
+
+			fileActions.registerAction({
+				name: 'view',
+				displayName: t('emlviewer', 'View'),
+				mime: 'message/rfc822',
+				permissions: OC.PERMISSION_READ,
+				actionHandler(fileName, context, event) {
+					event.preventDefault()
+					OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, sharingToken)
+				},
+			})
+			fileActions.setDefault('message/rfc822', 'view')
+		},
+	}
+
+})(OCA)
+
+function isSecureViewerAvailable() {
+	return true
+}
+
+// OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml)
+
+document.addEventListener('DOMContentLoaded', function() {
+
+	/* registerFileAction({ // inregistrez ca e de tip .eml
+		name: 'view',
+		displayName: 'View',
+		mime: 'message/rfc822',
+		permissions: OC.PERMISSION_READ,
+		actionHandler(fileName, context, event) {
+			event.preventDefault()
+			OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, '')
+		},
+	})
+
+	const fileActions = getFileActions() // setare implicita (default)
+	const emlAction = fileActions.find(action => action.mime === 'message/rfc822')
+
+	if (emlAction) {
+		emlAction.defaultAction = 'view'
+	}
+ */
+
+})

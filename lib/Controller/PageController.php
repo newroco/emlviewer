@@ -1,39 +1,55 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\EmlViewer\Controller;
 
-use DOMDocument;
 use Exception;
-
-
-if ((@include_once __DIR__ . '/../../vendor/autoload.php') === false) {
-    throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
-}
-
-use OCP\IRequest;
-use \OCP\IURLGenerator;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\Response;
-use OCP\AppFramework\Http\NotFoundResponse;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\FrontpageRoute;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
-use OCA\EmlViewer\Storage\AuthorStorage;
-use OCP\Share\IManager;
+use OCP\AppFramework\Http\RedirectResponse;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Services\IInitialState;
+use OCP\Constants;
+use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
-use OCP\ILogger;
-use OCP\AppFramework\Http;
+use OCP\IConfig;
+use OCP\IL10N;
+use OCP\IRequest;
+use OCP\IServerContainer;
+use OCP\IURLGenerator;
+use OCP\PreConditionNotMetException;
+use Psr\Log\LoggerInterface;
+use OCP\Share\IManager;
+use Throwable;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
 use ZBateson\MailMimeParser\IMessage;
-use \Mpdf\Mpdf;
+use Mpdf\Mpdf;
 
+use OCA\EmlViewer\AppInfo\Application;
+use OCA\EmlViewer\Storage\AuthorStorage;
 
-class PageController extends Controller
-{
-    protected $AppName;
+/**
+ * @psalm-suppress UnusedClass
+ */
+class PageController extends Controller {
+	public const FIXED_EML_SIZE_CONFIG_KEY = 'fixed_eml_size';
+
+	public const CONFIG_KEYS = [
+		self::FIXED_EML_SIZE_CONFIG_KEY,
+	];
+
+	protected $AppName;
     private $logger;
     private $userId;
     private $storage;
@@ -42,8 +58,10 @@ class PageController extends Controller
     private $urlGenerator;
     private $emlFile;
     private $shareToken;
+	private $config;
+	private $initialStateService;
 
-    /**
+	    /**
      * PageController constructor.
      * @param $AppName
      * @param IRequest $request
@@ -51,11 +69,15 @@ class PageController extends Controller
      * @param AuthorStorage $AuthorStorage
      * @param IManager $shareManager
      */
-    public function __construct($AppName, IRequest $request, $UserId,
-                                AuthorStorage $AuthorStorage,
-                                IManager $shareManager,
-                                ILogger $logger,
-                                IURLGenerator $urlGenerator)
+    public function __construct( string  $AppName,
+					IRequest $request,
+					?string $UserId,
+					AuthorStorage $AuthorStorage,
+					IManager $shareManager,
+					LoggerInterface $logger,
+					IURLGenerator $urlGenerator,
+					IConfig $config,
+					IInitialState $initialStateService)
     {
         parent::__construct($AppName, $request);
         $this->AppName = $AppName;
@@ -65,59 +87,76 @@ class PageController extends Controller
         $this->logger = $logger;
         $this->message = null;
         $this->urlGenerator = $urlGenerator;
+		$this->config = $config;
+		$this->initialStateService = $initialStateService;
     }
 
-    /**
-     * @return Response
-     * @PublicPage
-     * @NoCSRFRequired
-     * @NoAdminRequired
-     */
-    public function pdfPrint(): Response
-    {
-        try {
-            $message = $this->getMessage();
-            $from = $message->getHeaderValue('From');
-            $to = $message->getHeaderValue('To');
-            $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
+		/**
+	 * This returns the template of the main app's page
+	 * It adds some initialState data (file list and fixed_gif_size config value)
+	 * and also provide some data to the template (app version)
+	 *
+	 * @return TemplateResponse
+	 */
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	#[FrontpageRoute(verb: 'GET', url: '/')] // this tells Nextcloud to link GET requests to /index.php/apps/catgifs/ with the "mainPage" method
+	public function mainPage(): TemplateResponse {
+		$fileNameList = $this->getEmlFilenameList();
+		$fixedGifSize = $this->config->getUserValue($this->userId, Application::APP_ID, self::FIXED_EML_SIZE_CONFIG_KEY);
+		$myInitialState = [
+			'file_name_list' => $fileNameList,
+			self::FIXED_EML_SIZE_CONFIG_KEY => $fixedGifSize,
+		];
+		$this->initialStateService->provideInitialState('tutorial_initial_state', $myInitialState);
 
-            $response = $this->emlPrint(true);
-            $html = $response->render();
-            $formerErrorReporting = error_reporting(0);
-            $mpdf = new Mpdf([
-                'tempDir' => __DIR__ . '/../../tmp',
-                'mode' => 'UTF-8',
-                'format' => 'A4-P',
-                'default_font' => 'arial',
-                'margin_left' => 5,
-                'margin_right' => 5,
-                //'debug' => true,
-                'allow_output_buffering' => true,
-                'simpleTable' => false,
-                'use_kwt' => true,
-                'ignore_table_widths' => true,
-                'shrink_tables_to_fit' => false,
-                //'table_error_report' =>true,
-                'allow_charset_conversion' => true,
-                //'CSSselectMedia' => 'screen',
-                'author' => 'nextcloud ' . $this->AppName
-            ]);
-            //$mpdf->showImageErrors = true;
-            $mpdf->curlAllowUnsafeSslRequests = true;
-            $mpdf->curlTimeout = 1000;
-            $mpdf->setAutoTopMargin = 'stretch';
-            $mpdf->setAutoBottomMargin = 'stretch';
-            $mpdf->SetDisplayMode('fullwidth', 'single');
-            $mpdf->WriteHTML($html);
-            $mpdf->Output($filename, 'I');
-            error_reporting($formerErrorReporting);
-            exit;
-        } catch (Exception $e) {
-            return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
-        }
-    }
+		$appVersion = $this->config->getAppValue(Application::APP_ID, 'installed_version');
+		return new TemplateResponse(
+			Application::APP_ID,
+			'index',
+			[
+				'app_version' => $appVersion,
+			]
+		);
+	}
+
+	/**
+	 * Get the names of files stored in apps/my_app/img/gifs/
+	 *
+	 * @return array
+	 */
+	private function getEmlFilenameList(): array {
+		$path = dirname(__DIR__, 2) . '/eml';
+		$names = array_filter(scandir($path), static function ($name) {
+			return $name !== '.' && $name !== '..';
+		});
+		return array_values($names);
+	}
 
     /**
+	 * This is an API endpoint to set a user config value
+	 * It returns a simple DataResponse: a message to be displayed
+	 *
+	 * @param string $key
+	 * @param string $value
+	 * @return DataResponse
+	 * @throws PreConditionNotMetException
+	 */
+	#[NoAdminRequired]
+	#[FrontpageRoute(verb: 'PUT', url: '/config')] // this tells Nextcloud to link PUT requests to /index.php/apps/catgifs/config with the "saveConfig" method
+	public function saveConfig(string $key, string $value): DataResponse {
+		if (in_array($key, self::CONFIG_KEYS, true)) {
+			$this->config->setUserValue($this->userId, Application::APP_ID, $key, $value);
+			return new DataResponse([
+				'message' => 'Everything went fine',
+			]);
+		}
+		return new DataResponse([
+			'error_message' => 'Invalid config key',
+		], Http::STATUS_FORBIDDEN);
+	}
+
+ /**
      * @return mixed
      */
     public function getMessage()
@@ -129,7 +168,7 @@ class PageController extends Controller
     }
 
     /**
-     * @return IMessage
+     * @return Message
      * @throws Exception
      */
     protected function parseEml()
@@ -139,12 +178,12 @@ class PageController extends Controller
         if (isset($_GET['share_token']) && !empty($_GET['share_token'])) {
             $this->shareToken = $_GET['share_token'];
         }
+
         if (isset($_GET['eml_file']) && !empty($_GET['eml_file'])) {
             $this->emlFile = $_GET['eml_file'];
         } else if (!$this->shareToken) {
             throw new Exception('No eml file was sent');
         }
-
         if ($this->shareToken) {
             /* shared file or directory */
             $share = $this->shareManager->getShareByToken($this->shareToken);
@@ -175,7 +214,56 @@ class PageController extends Controller
         return $this->message;
     }
 
-    /**
+	 /**
+     * @return Response
+     * @PublicPage
+     * @NoCSRFRequired
+     * @NoAdminRequired
+     */
+    public function pdfPrint(): Response
+    {
+        try {
+            $message = $this->getMessage();
+            $from = $message->getHeaderValue('From');
+            $to = $message->getHeaderValue('To');
+            $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
+
+            $response = $this->emlPrint(true);
+            $html = $response->render();
+            $formerErrorReporting = error_reporting(0);
+            $mpdf = new Mpdf([
+                'tempDir' => __DIR__ . '/tmp',
+                'mode' => 'UTF-8',
+                'format' => 'A4-P',
+                'default_font' => 'arial',
+                'margin_left' => 5,
+                'margin_right' => 5,
+                //'debug' => true,
+                'allow_output_buffering' => true,
+                'simpleTable' => false,
+                'use_kwt' => true,
+                'ignore_table_widths' => true,
+                'shrink_tables_to_fit' => false,
+                //'table_error_report' =>true,
+                'allow_charset_conversion' => true,
+                //'CSSselectMedia' => 'screen',
+                'author' => 'nextcloud ' . $this->AppName
+            ]);
+            //$mpdf->showImageErrors = true;
+            $mpdf->curlAllowUnsafeSslRequests = true;
+            $mpdf->curlTimeout = 1000;
+            $mpdf->setAutoTopMargin = 'stretch';
+            $mpdf->setAutoBottomMargin = 'stretch';
+            $mpdf->SetDisplayMode('fullwidth', 'single');
+            $mpdf->WriteHTML($html);
+            $mpdf->Output($filename, 'I');
+            error_reporting($formerErrorReporting);
+            exit;
+        } catch (Exception $e) {
+            return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
+        }
+    }
+ /**
      * @PublicPage
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -228,7 +316,7 @@ class PageController extends Controller
                 $whatToInsertBefore = null;
 
                 if ($params['htmlContent']) {
-                    $doc = new DOMDocument();
+                    $doc = new \DOMDocument();
                     // modify state
                     $libxml_previous_state = libxml_use_internal_errors(true);
                     $doc->loadHTML($params['htmlContent']);
@@ -277,8 +365,7 @@ class PageController extends Controller
         }
         return $response;
     }
-
-    private function getAttachmentUrlPrefix()
+	private function getAttachmentUrlPrefix()
     {
         $urlAttachment = $this->urlGenerator->linkToRoute(
                 $this->AppName . '.page.attachment',
@@ -289,13 +376,16 @@ class PageController extends Controller
         return $urlAttachment;
     }
 
-    protected function getEmailHTMLContent(Message $message)
+	protected function getEmailHTMLContent(Message $message)
     {
+		$htmlContent = $message->getHtmlContent();
 
-        $html = str_replace('"', '\'', $message->getHtmlContent());
-        if (empty($html)) {
-            $html = nl2br($message->getTextContent());
-        }
+		if (!empty($htmlContent)) {
+			$html = str_replace('"', '\'', $htmlContent);
+		} else {
+			$html = nl2br($message->getTextContent());
+		}
+
         if (class_exists('tidy')) {
             $tidy = new tidy();
             //Specify configuration
