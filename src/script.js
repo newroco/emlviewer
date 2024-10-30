@@ -1,7 +1,8 @@
 /* eslint-disable jsdoc/require-param-description */
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-// import { registerFileAction, getFileActions } from '@nextcloud/files'
+import { registerFileAction, FileAction, DefaultType, Permission, getFileActions } from '@nextcloud/files'
+import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 (function(OCA) {
 
@@ -20,14 +21,6 @@ import axios from '@nextcloud/axios'
 
 		_baseUrl: '/apps/emlviewer',
 
-		/**
-		 * @param fileList
-		 */
-
-		attach(fileList) {
-			this._extendFileActions(fileList.fileActions)
-		},
-
 		bringInSidebar() {
 			const defaultHtml = `
                 <span class="close icon-close"></span>
@@ -41,7 +34,7 @@ import axios from '@nextcloud/axios'
 				appSidebar.remove()
 			}
 
-			const appContent = document.getElementById('app-content')
+			const appContent = document.getElementById('content-vue')
 
 			const newSidebar = document.createElement('div')
 			newSidebar.id = 'app-sidebar'
@@ -109,79 +102,43 @@ import axios from '@nextcloud/axios'
 		show(filePath, shareToken) {
 			this.bringInSidebar()
 			this.displayParsedEmail(filePath, shareToken)
-
 		},
 
-		/**
-		 *
-		 * @param {object} fileActions
-		 *
-		 */
-		_extendFileActions(fileActions) {
 
-			if (typeof isSecureViewerAvailable !== 'undefined' && isSecureViewerAvailable()) {
-				return
-			}
-
-			const sharingToken = document.getElementById('sharingToken') ? document.getElementById('sharingToken').value : ''
-
-			fileActions.registerAction({
-				name: 'view',
-				displayName: t('emlviewer', 'View'),
-				mime: 'application/octet-stream',
-				permissions: OC.PERMISSION_READ,
-				actionHandler(fileName, context, event) {
-					event.preventDefault()
-					if (fileName.trim().toLowerCase().endsWith('.eml')) {
-						OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, sharingToken)
-					}
-
-				},
-			})
-
-			fileActions.setDefault('application/octet-stream', 'view')
-
-			fileActions.registerAction({
-				name: 'view',
-				displayName: t('emlviewer', 'View'),
-				mime: 'message/rfc822',
-				permissions: OC.PERMISSION_READ,
-				actionHandler(fileName, context, event) {
-					event.preventDefault()
-					OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, sharingToken)
-				},
-			})
-			fileActions.setDefault('message/rfc822', 'view')
-		},
 	}
 
 })(OCA)
 
-function isSecureViewerAvailable() {
-	return true
-}
-
 // OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml)
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', (event) => {
+	let sharingToken = '';
+	if (isPublicShare()) {
+		sharingToken = getSharingToken();
+	}
 
-	/* registerFileAction({ // inregistrez ca e de tip .eml
-		name: 'view',
-		displayName: 'View',
+	let eml_mime= 'message/rfc822';
+	let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"/></svg>`
+	registerFileAction(new FileAction({
+		id: 'eml_view',
+		displayName: () => t('view', 'View'),
+		default: DefaultType.DEFAULT,
 		mime: 'message/rfc822',
-		permissions: OC.PERMISSION_READ,
-		actionHandler(fileName, context, event) {
-			event.preventDefault()
-			OCA.FilesEmlViewer.PreviewEml.show(context.dir + '/' + fileName, '')
+		enabled: (nodes) => {
+			return nodes.every((node) => node.mime === eml_mime && (node.permissions & Permission.READ))
 		},
-	})
+		iconSvgInline: () => {return svg},
+		permissions: OC.PERMISSION_READ,
+		async exec(file,view,dir) {
+			OCA.FilesEmlViewer.PreviewEml.show(file.path,sharingToken)
+			return true
+		},
+	}))
 
-	const fileActions = getFileActions() // setare implicita (default)
-	const emlAction = fileActions.find(action => action.mime === 'message/rfc822')
+	const fileActions = getFileActions()
+	const emlAction = fileActions.find(action => action.mime === eml_mime)
 
 	if (emlAction) {
-		emlAction.defaultAction = 'view'
+		emlAction.defaultAction = 'eml_view'
 	}
- */
-
 })

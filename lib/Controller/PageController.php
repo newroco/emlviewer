@@ -5,38 +5,25 @@ declare(strict_types=1);
 namespace OCA\EmlViewer\Controller;
 
 use Exception;
-use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\FrontpageRoute;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Services\IInitialState;
-use OCP\Constants;
-use OCP\Files\IRootFolder;
-use OCP\Files\NotFoundException;
 use OCP\IConfig;
-use OCP\IL10N;
 use OCP\IRequest;
-use OCP\IServerContainer;
 use OCP\IURLGenerator;
-use OCP\PreConditionNotMetException;
 use Psr\Log\LoggerInterface;
 use OCP\Share\IManager;
-use Throwable;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
-use ZBateson\MailMimeParser\IMessage;
 use Mpdf\Mpdf;
 
-use OCA\EmlViewer\AppInfo\Application;
 use OCA\EmlViewer\Storage\AuthorStorage;
 
 /**
@@ -51,112 +38,37 @@ class PageController extends Controller {
 
 	protected $AppName;
     private $logger;
-    private $userId;
     private $storage;
     private $shareManager;
     private $message;
     private $urlGenerator;
     private $emlFile;
     private $shareToken;
-	private $config;
-	private $initialStateService;
 
 	    /**
      * PageController constructor.
      * @param $AppName
      * @param IRequest $request
-     * @param $UserId
      * @param AuthorStorage $AuthorStorage
      * @param IManager $shareManager
      */
-    public function __construct( string  $AppName,
+    public function __construct($AppName,
 					IRequest $request,
-					?string $UserId,
 					AuthorStorage $AuthorStorage,
 					IManager $shareManager,
 					LoggerInterface $logger,
-					IURLGenerator $urlGenerator,
-					IConfig $config,
-					IInitialState $initialStateService)
+					IURLGenerator $urlGenerator)
     {
         parent::__construct($AppName, $request);
         $this->AppName = $AppName;
         $this->storage = $AuthorStorage;
         $this->shareManager = $shareManager;
-        $this->userId = $UserId;
         $this->logger = $logger;
         $this->message = null;
         $this->urlGenerator = $urlGenerator;
-		$this->config = $config;
-		$this->initialStateService = $initialStateService;
     }
 
-		/**
-	 * This returns the template of the main app's page
-	 * It adds some initialState data (file list and fixed_gif_size config value)
-	 * and also provide some data to the template (app version)
-	 *
-	 * @return TemplateResponse
-	 */
-	#[NoCSRFRequired]
-	#[NoAdminRequired]
-	#[FrontpageRoute(verb: 'GET', url: '/')] // this tells Nextcloud to link GET requests to /index.php/apps/catgifs/ with the "mainPage" method
-	public function mainPage(): TemplateResponse {
-		$fileNameList = $this->getEmlFilenameList();
-		$fixedGifSize = $this->config->getUserValue($this->userId, Application::APP_ID, self::FIXED_EML_SIZE_CONFIG_KEY);
-		$myInitialState = [
-			'file_name_list' => $fileNameList,
-			self::FIXED_EML_SIZE_CONFIG_KEY => $fixedGifSize,
-		];
-		$this->initialStateService->provideInitialState('tutorial_initial_state', $myInitialState);
-
-		$appVersion = $this->config->getAppValue(Application::APP_ID, 'installed_version');
-		return new TemplateResponse(
-			Application::APP_ID,
-			'index',
-			[
-				'app_version' => $appVersion,
-			]
-		);
-	}
-
-	/**
-	 * Get the names of files stored in apps/my_app/img/gifs/
-	 *
-	 * @return array
-	 */
-	private function getEmlFilenameList(): array {
-		$path = dirname(__DIR__, 2) . '/eml';
-		$names = array_filter(scandir($path), static function ($name) {
-			return $name !== '.' && $name !== '..';
-		});
-		return array_values($names);
-	}
-
     /**
-	 * This is an API endpoint to set a user config value
-	 * It returns a simple DataResponse: a message to be displayed
-	 *
-	 * @param string $key
-	 * @param string $value
-	 * @return DataResponse
-	 * @throws PreConditionNotMetException
-	 */
-	#[NoAdminRequired]
-	#[FrontpageRoute(verb: 'PUT', url: '/config')] // this tells Nextcloud to link PUT requests to /index.php/apps/catgifs/config with the "saveConfig" method
-	public function saveConfig(string $key, string $value): DataResponse {
-		if (in_array($key, self::CONFIG_KEYS, true)) {
-			$this->config->setUserValue($this->userId, Application::APP_ID, $key, $value);
-			return new DataResponse([
-				'message' => 'Everything went fine',
-			]);
-		}
-		return new DataResponse([
-			'error_message' => 'Invalid config key',
-		], Http::STATUS_FORBIDDEN);
-	}
-
- /**
      * @return mixed
      */
     public function getMessage()
@@ -232,7 +144,7 @@ class PageController extends Controller {
             $html = $response->render();
             $formerErrorReporting = error_reporting(0);
             $mpdf = new Mpdf([
-                'tempDir' => __DIR__ . '/tmp',
+                'tempDir' => __DIR__ . '/../../tmp',
                 'mode' => 'UTF-8',
                 'format' => 'A4-P',
                 'default_font' => 'arial',
@@ -458,11 +370,6 @@ class PageController extends Controller {
             return new DataDownloadResponse($content, self::getPartFilename($part), $part->getHeaderValue('Content-Type'));
         }
         return new NotFoundResponse();
-    }
-
-    public function index(): TemplateResponse
-    {
-        return new TemplateResponse($this->AppName, 'index');  // templates/index.php
     }
 
     protected function extractTableInTable($element)

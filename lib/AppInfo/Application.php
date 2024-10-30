@@ -14,9 +14,7 @@ use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
 use \OCA\EmlViewer\Storage\AuthorStorage;
 
-class Application extends App implements IBootstrap
-{
-
+class Application extends App implements IBootstrap{
     const APP_ID = 'emlviewer';
 
     public function __construct()
@@ -63,7 +61,6 @@ class Application extends App implements IBootstrap
     public function register(IRegistrationContext $context): void
     {
         // ... registration logic goes here ...
-
         if ((@include_once __DIR__ . '/../../vendor/autoload.php') === false) {
             throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
         }
@@ -75,13 +72,13 @@ class Application extends App implements IBootstrap
     {
         $eventDispatcher = \OC::$server->get(IEventDispatcher::class);
         $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-            Util::addScript(self::APP_ID, 'script');
-            Util::addStyle(self::APP_ID, 'style');
+            Util::addScript(self::APP_ID, self::APP_ID. '-script');
+            Util::addStyle(self::APP_ID, self::APP_ID.'-style');
         });
 
         $eventDispatcher->addListener(BeforeTemplateRenderedEvent::class, function () {
-            Util::addScript(self::APP_ID, 'script');
-            Util::addStyle(self::APP_ID, 'style');
+            Util::addScript(self::APP_ID, self::APP_ID. '-script');
+            Util::addStyle(self::APP_ID, self::APP_ID.'-style');
         });
     }
 
