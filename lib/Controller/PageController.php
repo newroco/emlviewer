@@ -290,12 +290,16 @@ class PageController extends Controller {
 
 	protected function getEmailHTMLContent(Message $message)
     {
+		$html = '';
 		$htmlContent = $message->getHtmlContent();
 
 		if (!empty($htmlContent)) {
 			$html = str_replace('"', '\'', $htmlContent);
 		} else {
-			$html = nl2br($message->getTextContent());
+			$textContent = $message->getTextContent();
+			if($textContent){
+				$html =  nl2br($textContent);
+			}
 		}
 
         if (class_exists('tidy')) {
