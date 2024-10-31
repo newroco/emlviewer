@@ -70,9 +70,8 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 					}
 
 					const makePdfElement = document.getElementById('make-pdf')
-					if (makePdfElement) {
-						const toggleTextContentButton = document.getElementById('toggle-text-content')
-
+					const toggleTextContentButton = document.getElementById('toggle-text-content')
+					if (toggleTextContentButton) {
 						toggleTextContentButton.addEventListener('click', () => {
 
 							const emailTextContentElement = document.querySelector('.emlviewer_email_text_content')

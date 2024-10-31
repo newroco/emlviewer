@@ -15688,8 +15688,8 @@ __webpack_require__.r(__webpack_exports__);
           mailContentElement.innerHTML = response.data;
         }
         const makePdfElement = document.getElementById('make-pdf');
-        if (makePdfElement) {
-          const toggleTextContentButton = document.getElementById('toggle-text-content');
+        const toggleTextContentButton = document.getElementById('toggle-text-content');
+        if (toggleTextContentButton) {
           toggleTextContentButton.addEventListener('click', () => {
             const emailTextContentElement = document.querySelector('.emlviewer_email_text_content');
             if (emailTextContentElement) {
