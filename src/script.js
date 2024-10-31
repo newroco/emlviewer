@@ -27,18 +27,18 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
                 <div class="mail-content"><br/><br/>Preparing preview... please wait.</div>
             `
 
-			const appSidebar = document.getElementById('emlviewer-content')
+			const appSidebar = document.getElementById('app-sidebar')
 			if (appSidebar) {
 				appSidebar.remove()
 			}
 
-			const appContent = document.getElementById('content-vue')
+			let appContent = document.getElementById('content-vue')
 			if(!appContent){
 				appContent = document.getElementById('content')
 			}
 
 			const newSidebar = document.createElement('div')
-			newSidebar.id = 'emlviewer-content'
+			newSidebar.id = 'app-sidebar'
 			newSidebar.className = 'emlviewer'
 			newSidebar.innerHTML = defaultHtml
 			appContent.after(newSidebar)

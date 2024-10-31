@@ -13,19 +13,19 @@ li[data-id='emlviewer'] {
     background-color: rgba(255, 255, 255, 0.7);
 }
 
-#emlviewer-content {
+#app-sidebar.emlviewer {
     width: 100%;
     max-width: none;
 }
 
-#emlviewer-content .close {
+#app-sidebar.emlviewer .close {
     cursor: pointer;
     position: absolute;
     top: 0;
     right: 0;
     z-index: 1;
 }
-#emlviewer-content .icon-close {
+#app-sidebar.emlviewer .icon-close {
     display: block;
     width: 44px;
     height: 44px;
