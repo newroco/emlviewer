@@ -15653,13 +15653,16 @@ __webpack_require__.r(__webpack_exports__);
                 <span class="close icon-close"></span>
                 <div class="mail-content"><br/><br/>Preparing preview... please wait.</div>
             `;
-      const appSidebar = document.getElementById('app-sidebar');
+      const appSidebar = document.getElementById('emlviewer-content');
       if (appSidebar) {
         appSidebar.remove();
       }
       const appContent = document.getElementById('content-vue');
+      if (!appContent) {
+        appContent = document.getElementById('content');
+      }
       const newSidebar = document.createElement('div');
-      newSidebar.id = 'app-sidebar';
+      newSidebar.id = 'emlviewer-content';
       newSidebar.className = 'emlviewer';
       newSidebar.innerHTML = defaultHtml;
       appContent.after(newSidebar);
