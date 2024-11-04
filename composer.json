@@ -11,8 +11,7 @@
   "require": {
 	"php": ">=8.0 <=8.3",
     "zbateson/mail-mime-parser": "2.4",
-    "mpdf/mpdf": "~8.2",
-	"psr/log": "^1.1",
+    "mpdf/mpdf": "^8.1",
     "ext-gd": "*",
     "ext-dom": "*",
     "ext-intl": "*",
