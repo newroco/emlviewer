@@ -1,0 +1,34 @@
+{
+  "name": "emlviewer",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-or-later",
+  "engines": {
+    "node": "^20.0.0",
+    "npm": "^10.0.0"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production webpack --config webpack.js --progress",
+    "dev": "NODE_ENV=development webpack --config webpack.js --progress",
+    "watch": "NODE_ENV=development webpack --config webpack.js --progress --watch",
+    "lint": "eslint src",
+    "stylelint": "stylelint src/**/*.vue src/**/*.scss src/**/*.css"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "dependencies": {
+    "@nextcloud/axios": "^2.5.1",
+    "@nextcloud/files": "^3.9.1",
+    "@nextcloud/router": "^3.0.1",
+    "@nextcloud/sharing": "^0.2.3"
+  },
+  "devDependencies": {
+    "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/eslint-config": "^8.3.0",
+    "@nextcloud/stylelint-config": "^2.4.0",
+    "@nextcloud/webpack-vue-config": "^6.0.1",
+    "eslint-webpack-plugin": "^4.1.0",
+    "stylelint-webpack-plugin": "^5.0.0",
+    "vue-svg-loader": "^0.17.0-beta.2"
+  }
+}

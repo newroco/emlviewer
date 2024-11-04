@@ -1,41 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\EmlViewer\Controller;
 
-use DOMDocument;
 use Exception;
-
-
-if ((@include_once __DIR__ . '/../../vendor/autoload.php') === false) {
-    throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
-}
-
-use OCP\IRequest;
-use \OCP\IURLGenerator;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\Response;
-use OCP\AppFramework\Http\NotFoundResponse;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
-use OCA\EmlViewer\Storage\AuthorStorage;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IRequest;
+use OCP\IURLGenerator;
+use Psr\Log\LoggerInterface;
 use OCP\Share\IManager;
-use OCP\Files\NotFoundException;
-use OCP\ILogger;
-use OCP\AppFramework\Http;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
-use ZBateson\MailMimeParser\IMessage;
-use \Mpdf\Mpdf;
+use Mpdf\Mpdf;
 
+use OCA\EmlViewer\Storage\AuthorStorage;
 
-class PageController extends Controller
-{
-    protected $AppName;
+/**
+ * @psalm-suppress UnusedClass
+ */
+class PageController extends Controller {
+	public const FIXED_EML_SIZE_CONFIG_KEY = 'fixed_eml_size';
+
+	public const CONFIG_KEYS = [
+		self::FIXED_EML_SIZE_CONFIG_KEY,
+	];
+
+	protected $AppName;
     private $logger;
-    private $userId;
     private $storage;
     private $shareManager;
     private $message;
@@ -43,31 +44,88 @@ class PageController extends Controller
     private $emlFile;
     private $shareToken;
 
-    /**
+	    /**
      * PageController constructor.
      * @param $AppName
      * @param IRequest $request
-     * @param $UserId
      * @param AuthorStorage $AuthorStorage
      * @param IManager $shareManager
      */
-    public function __construct($AppName, IRequest $request, $UserId,
-                                AuthorStorage $AuthorStorage,
-                                IManager $shareManager,
-                                ILogger $logger,
-                                IURLGenerator $urlGenerator)
+    public function __construct($AppName,
+					IRequest $request,
+					AuthorStorage $AuthorStorage,
+					IManager $shareManager,
+					LoggerInterface $logger,
+					IURLGenerator $urlGenerator)
     {
         parent::__construct($AppName, $request);
         $this->AppName = $AppName;
         $this->storage = $AuthorStorage;
         $this->shareManager = $shareManager;
-        $this->userId = $UserId;
         $this->logger = $logger;
         $this->message = null;
         $this->urlGenerator = $urlGenerator;
     }
 
     /**
+     * @return mixed
+     */
+    public function getMessage()
+    {
+        if ($this->message === null) {
+            $this->parseEml();
+        }
+        return $this->message;
+    }
+
+    /**
+     * @return Message
+     * @throws Exception
+     */
+    protected function parseEml()
+    {
+        $this->shareToken = null;
+        $contents = '';
+        if (isset($_GET['share_token']) && !empty($_GET['share_token'])) {
+            $this->shareToken = $_GET['share_token'];
+        }
+
+        if (isset($_GET['eml_file']) && !empty($_GET['eml_file'])) {
+            $this->emlFile = $_GET['eml_file'];
+        } else if (!$this->shareToken) {
+            throw new Exception('No eml file was sent');
+        }
+        if ($this->shareToken) {
+            /* shared file or directory */
+            $share = $this->shareManager->getShareByToken($this->shareToken);
+            $node = $share->getNode();
+            $type = $node->getType();
+
+            /* shared directory, need file path to continue, */
+            if ($type !== \OCP\Files\FileInfo::TYPE_FOLDER) {
+                $extension = strtolower($node->getExtension());
+                if ($extension == 'eml') {
+                    $contents = $node->getContent();
+                }
+            } else {//this is a directory
+                $fileNode = $node->get($this->emlFile);
+                $extension = strtolower($fileNode->getExtension());
+                if ($extension == 'eml') {
+                    $contents = $fileNode->getContent();
+                }
+            }
+        } else {
+            $contents = $this->storage->emlFileContent($this->emlFile);
+        }
+        if (!$contents) {
+            throw new Exception('Could not load contents of file' . $this->emlFile);
+        }
+
+        $this->message = Message::from($contents, true);
+        return $this->message;
+    }
+
+	 /**
      * @return Response
      * @PublicPage
      * @NoCSRFRequired
@@ -116,66 +174,7 @@ class PageController extends Controller
             return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
         }
     }
-
-    /**
-     * @return mixed
-     */
-    public function getMessage()
-    {
-        if ($this->message === null) {
-            $this->parseEml();
-        }
-        return $this->message;
-    }
-
-    /**
-     * @return IMessage
-     * @throws Exception
-     */
-    protected function parseEml()
-    {
-        $this->shareToken = null;
-        $contents = '';
-        if (isset($_GET['share_token']) && !empty($_GET['share_token'])) {
-            $this->shareToken = $_GET['share_token'];
-        }
-        if (isset($_GET['eml_file']) && !empty($_GET['eml_file'])) {
-            $this->emlFile = $_GET['eml_file'];
-        } else if (!$this->shareToken) {
-            throw new Exception('No eml file was sent');
-        }
-
-        if ($this->shareToken) {
-            /* shared file or directory */
-            $share = $this->shareManager->getShareByToken($this->shareToken);
-            $node = $share->getNode();
-            $type = $node->getType();
-
-            /* shared directory, need file path to continue, */
-            if ($type !== \OCP\Files\FileInfo::TYPE_FOLDER) {
-                $extension = strtolower($node->getExtension());
-                if ($extension == 'eml') {
-                    $contents = $node->getContent();
-                }
-            } else {//this is a directory
-                $fileNode = $node->get($this->emlFile);
-                $extension = strtolower($fileNode->getExtension());
-                if ($extension == 'eml') {
-                    $contents = $fileNode->getContent();
-                }
-            }
-        } else {
-            $contents = $this->storage->emlFileContent($this->emlFile);
-        }
-        if (!$contents) {
-            throw new Exception('Could not load contents of file' . $this->emlFile);
-        }
-
-        $this->message = Message::from($contents, true);
-        return $this->message;
-    }
-
-    /**
+ /**
      * @PublicPage
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -228,7 +227,7 @@ class PageController extends Controller
                 $whatToInsertBefore = null;
 
                 if ($params['htmlContent']) {
-                    $doc = new DOMDocument();
+                    $doc = new \DOMDocument();
                     // modify state
                     $libxml_previous_state = libxml_use_internal_errors(true);
                     $doc->loadHTML($params['htmlContent']);
@@ -277,8 +276,7 @@ class PageController extends Controller
         }
         return $response;
     }
-
-    private function getAttachmentUrlPrefix()
+	private function getAttachmentUrlPrefix()
     {
         $urlAttachment = $this->urlGenerator->linkToRoute(
                 $this->AppName . '.page.attachment',
@@ -289,13 +287,20 @@ class PageController extends Controller
         return $urlAttachment;
     }
 
-    protected function getEmailHTMLContent(Message $message)
+	protected function getEmailHTMLContent(Message $message)
     {
+		$html = '';
+		$htmlContent = $message->getHtmlContent();
 
-        $html = str_replace('"', '\'', $message->getHtmlContent());
-        if (empty($html)) {
-            $html = nl2br($message->getTextContent());
-        }
+		if (!empty($htmlContent)) {
+			$html = str_replace('"', '\'', $htmlContent);
+		} else {
+			$textContent = $message->getTextContent();
+			if($textContent){
+				$html =  nl2br($textContent);
+			}
+		}
+
         if (class_exists('tidy')) {
             $tidy = new tidy();
             //Specify configuration
@@ -368,11 +373,6 @@ class PageController extends Controller
             return new DataDownloadResponse($content, self::getPartFilename($part), $part->getHeaderValue('Content-Type'));
         }
         return new NotFoundResponse();
-    }
-
-    public function index(): TemplateResponse
-    {
-        return new TemplateResponse($this->AppName, 'index');  // templates/index.php
     }
 
     protected function extractTableInTable($element)

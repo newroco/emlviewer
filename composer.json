@@ -9,8 +9,13 @@
     }
   ],
   "require": {
+	"php": ">=8.0 <=8.3",
     "zbateson/mail-mime-parser": "2.4",
-    "mpdf/mpdf": "^8.2"
+    "mpdf/mpdf": "^8.1",
+    "ext-gd": "*",
+    "ext-dom": "*",
+    "ext-intl": "*",
+    "ext-mbstring": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "*"
