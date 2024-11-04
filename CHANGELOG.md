@@ -1,3 +1,6 @@
+## 2.0.0 – 2024-11-04
+Compatbile with Nextcloud 28, 29, 30 and 31.
+
 ## 1.0.9 – 2023-02-07
 Upgraded dependencies.
 Fixed composer and PSR version included in vendor folder.

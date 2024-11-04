@@ -3,7 +3,7 @@ This is a nextcloud app which provides an email preview functionality.
 It creates preview for .eml files and displays it as a modal. It also provides an easy PDF export function.
 
 # :zap: Requirements
-This app requires php version 7.4 or greater and mbstring extension
+This app requires php version 8.0 or greater and mbstring extension
 Tidy is optional, makes html email look better if installed.
 <pre>
 sudo apt-get update
