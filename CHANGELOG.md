@@ -1,3 +1,6 @@
+## 2.0.1 – 2025-05-11
+Updated included dependecies to fix PSR issues
+
 ## 2.0.0 – 2024-11-04
 Compatbile with Nextcloud 28, 29, 30 and 31.
 
