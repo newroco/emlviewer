@@ -2,19 +2,19 @@
 
 namespace OCA\EmlViewer\Tests\Unit\Controller;
 
-use PHPUnit_Framework_TestCase;
+use Test\TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
 use OCA\EmlViewer\Controller\PageController;
 
 
-class PageControllerTest extends PHPUnit_Framework_TestCase
+class PageControllerTest extends TestCase
 {
     private $controller;
     private $userId = 'john';
 
-    public function setUp()
+    public function setUp():void
     {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
 
