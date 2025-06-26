@@ -16,6 +16,7 @@ li[data-id='emlviewer'] {
 #app-sidebar.emlviewer {
     width: 100%;
     max-width: none;
+    position: absolute;
 }
 
 #app-sidebar.emlviewer .close {
