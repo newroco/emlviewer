@@ -3,16 +3,20 @@
 namespace OCA\EmlViewer\AppInfo;
 
 use Exception;
+
 use OCP\AppFramework\App;
-use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
-use OCP\Util;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Security\IContentSecurityPolicyManager;
+use OCP\Server;
+use OCP\Util;
+
+use OCA\EmlViewer\Storage\AuthorStorage;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
-use \OCA\EmlViewer\Storage\AuthorStorage;
 
 class Application extends App implements IBootstrap{
     const APP_ID = 'emlviewer';
@@ -21,7 +25,7 @@ class Application extends App implements IBootstrap{
     {
         parent::__construct(self::APP_ID);
 
-        $manager = \OC::$server->getContentSecurityPolicyManager();
+        $manager = Server::get(IContentSecurityPolicyManager::class);
         $policy = new EmptyContentSecurityPolicy();
 
         $policy->addAllowedStyleDomain('\'self\'');
