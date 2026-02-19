@@ -204,7 +204,8 @@ class PageController extends Controller {
             $params['urlAttachment'] = $this->getAttachmentUrlPrefix();
             //Headers
             $params['from'] = $message->getHeaderValue('From');
-            $params['to'] = $message->getHeaderValue('To');
+            $params['to'] = $message->getHeader('To') ? $message->getHeader('To')->getRawValue() : '';
+            $params['cc'] = $message->getHeader('Cc') ? $message->getHeader('Cc')->getRawValue() : '';
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
             $params['subject'] = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
