@@ -11,7 +11,6 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\EmptyContentSecurityPolicy;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Security\IContentSecurityPolicyManager;
-use OCP\Server;
 use OCP\Util;
 
 use OCA\EmlViewer\Storage\AuthorStorage;
@@ -24,42 +23,6 @@ class Application extends App implements IBootstrap{
     public function __construct()
     {
         parent::__construct(self::APP_ID);
-
-        $manager = Server::get(IContentSecurityPolicyManager::class);
-        $policy = new EmptyContentSecurityPolicy();
-
-        $policy->addAllowedStyleDomain('\'self\'');
-        $policy->addAllowedStyleDomain('*');
-        $policy->addAllowedFontDomain('*');
-        $policy->addAllowedScriptDomain('\'self\'');
-
-        $policy->addAllowedImageDomain('*');
-        $policy->addAllowedImageDomain('data:');
-        $policy->addAllowedImageDomain('blob:');
-        $policy->addAllowedImageDomain('cid:');
-
-        $policy->addAllowedMediaDomain('\'self\'');
-        $policy->addAllowedMediaDomain('blob:');
-
-        $policy->addAllowedChildSrcDomain('\'self\'');
-        $policy->addAllowedChildSrcDomain('blob:');
-
-        $policy->addAllowedConnectDomain('\'self\'');
-
-        $manager->addDefaultPolicy($policy);
-
-        /**
-         * Storage Layer
-         */
-        $container = $this->getContainer();
-        $container->registerService('AuthorStorage', function ($c) {
-            return new AuthorStorage($c->get('RootStorage'));
-        });
-
-        $container->registerService('RootStorage', function ($c) {
-            return $c->get('ServerContainer')->getUserFolder();
-        });
-
     }
 
     public function register(IRegistrationContext $context): void
@@ -68,26 +31,49 @@ class Application extends App implements IBootstrap{
         if ((@include_once __DIR__ . '/../../vendor/autoload.php') === false) {
             throw new Exception('Cannot include autoload. Did you run install dependencies using composer?');
         }
-
-        $this->registerScripts();
     }
 
-    protected function registerScripts()
+    protected function registerScripts(IBootContext $context): void
     {
-        $eventDispatcher = \OC::$server->get(IEventDispatcher::class);
-        $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-            Util::addScript(self::APP_ID, self::APP_ID. '-script');
-            Util::addStyle(self::APP_ID, self::APP_ID.'-style');
-        });
+        $context->injectFn(function(IEventDispatcher $eventDispatcher) {
+            $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+                Util::addScript(self::APP_ID, self::APP_ID. '-script');
+                Util::addStyle(self::APP_ID, self::APP_ID.'-style');
+            });
 
-        $eventDispatcher->addListener(BeforeTemplateRenderedEvent::class, function () {
-            Util::addScript(self::APP_ID, self::APP_ID. '-script');
-            Util::addStyle(self::APP_ID, self::APP_ID.'-style');
+            $eventDispatcher->addListener(BeforeTemplateRenderedEvent::class, function () {
+                Util::addScript(self::APP_ID, self::APP_ID. '-script');
+                Util::addStyle(self::APP_ID, self::APP_ID.'-style');
+            });
         });
     }
 
     public function boot(IBootContext $context): void
     {
-        // ... boot logic goes here ...
+        $this->registerScripts($context);
+
+        $context->injectFn(function(IContentSecurityPolicyManager $manager) {
+            $policy = new EmptyContentSecurityPolicy();
+
+            $policy->addAllowedStyleDomain('\'self\'');
+            $policy->addAllowedStyleDomain('*');
+            $policy->addAllowedFontDomain('*');
+            $policy->addAllowedScriptDomain('\'self\'');
+
+            $policy->addAllowedImageDomain('*');
+            $policy->addAllowedImageDomain('data:');
+            $policy->addAllowedImageDomain('blob:');
+            $policy->addAllowedImageDomain('cid:');
+
+            $policy->addAllowedMediaDomain('\'self\'');
+            $policy->addAllowedMediaDomain('blob:');
+
+            $policy->addAllowedChildSrcDomain('\'self\'');
+            $policy->addAllowedChildSrcDomain('blob:');
+
+            $policy->addAllowedConnectDomain('\'self\'');
+
+            $manager->addDefaultPolicy($policy);
+        });
     }
 }

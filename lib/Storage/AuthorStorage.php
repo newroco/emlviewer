@@ -3,23 +3,31 @@
 namespace OCA\EmlViewer\Storage;
 
 use Exception;
-use \OCP\Files\NotFoundException;
-use \OCP\Storage\StorageException;
+use OCP\IUserSession;
+use OCP\Files\IRootFolder;
+use OCP\Files\Folder;
+use OCP\Files\NotFoundException;
+use OCP\Storage\StorageException;
 
 
 class AuthorStorage
 {
-    private $storage;
+    private ?Folder $storage = null;
 
-    public function __construct($myStorage)
-    {
-        $this->storage = $myStorage;
+    public function __construct(
+        IRootFolder $rootFolder,
+        IUserSession $userSession,
+    ) {
+        $userId = $userSession->getUser()?->getUID();
+        if ($userId) {
+            $this->storage = $rootFolder->getUserFolder($userId);
+        }
     }
 
-    public function emlFileContent($filePath)
+    public function emlFileContent(string $filePath): string
     {
         try {
-            $file = $this->storage->get($filePath);
+            $file = $this->storage?->get($filePath);
             if ($file) {
                 return $file->getContent();
             }
