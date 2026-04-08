@@ -1,3 +1,8 @@
+## 2.0.2 – 2026-04-08
+- Upgrade to support NC32
+- Added ability to see all CC email addresses in PDF (https://github.com/newroco/emlviewer/issues/75)
+- Fixed various errors from vendord includes (https://github.com/newroco/emlviewer/issues/70 https://github.com/newroco/emlviewer/issues/68 )
+
 ## 2.0.1 – 2025-05-11
 Updated included dependencies to fix PSR issues
 
