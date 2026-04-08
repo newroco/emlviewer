@@ -1,0 +1,27 @@
+services:
+  db:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: nextcloud
+
+  nextcloud:
+    image: nextcloud:31
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: nextcloud
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: admin
+    volumes:
+      - .:/var/www/html/custom_apps/emlviewer
+
+volumes:
+  nextcloud_data:
