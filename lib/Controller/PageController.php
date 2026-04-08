@@ -167,11 +167,24 @@ class PageController extends Controller {
             $mpdf->setAutoBottomMargin = 'stretch';
             $mpdf->SetDisplayMode('fullwidth', 'single');
             $mpdf->WriteHTML($html);
-            $mpdf->Output($filename, 'I');
+            
+            // Generate PDF to string instead of outputting directly
+            $pdfContent = $mpdf->Output($filename, 'S'); // 'S' returns the PDF as a string
             error_reporting($formerErrorReporting);
-            exit;
+            
+            // Return proper HTTP response
+            $pdfResponse = new Http\DataDownloadResponse(
+                $pdfContent,
+                $filename,
+                'application/pdf'
+            );
+            return $pdfResponse;
         } catch (Exception $e) {
-            return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
+            $this->logger->error('Error trying to render pdf: ' . $e->getMessage());
+            return new DataResponse(
+                array('msg' => 'Error trying to render pdf: ' . $e->getMessage()),
+                Http::STATUS_INTERNAL_SERVER_ERROR
+            );
         }
     }
  /**
