@@ -37,5 +37,15 @@
       "target-directory": "vendor-bin",
       "forward-command": true
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+        "mkdir -p tmp/mpdf",
+        "chmod 755 tmp/mpdf"
+    ],
+    "post-update-cmd": [
+        "mkdir -p tmp/mpdf",
+        "chmod 755 tmp/mpdf"
+    ]
   }
 }

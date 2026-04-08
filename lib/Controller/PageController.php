@@ -139,11 +139,20 @@ class PageController extends Controller {
             $to = $message->getHeaderValue('To');
             $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
 
+            // Ensure tmp/mpdf directory exists and is writable
+            $tmpDir = __DIR__ . '/../../tmp/mpdf';
+            if (!is_dir($tmpDir)) {
+                mkdir($tmpDir, 0755, true);
+            }
+            if (!is_writable($tmpDir)) {
+                chmod($tmpDir, 0755);
+            }
+
             $response = $this->emlPrint(true);
             $html = $response->render();
             $formerErrorReporting = error_reporting(0);
             $mpdf = new Mpdf([
-                'tempDir' => __DIR__ . '/../../tmp',
+                'tempDir' => $tmpDir,
                 'mode' => 'UTF-8',
                 'format' => 'A4-P',
                 'default_font' => 'arial',
