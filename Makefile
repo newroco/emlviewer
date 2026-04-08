@@ -125,8 +125,7 @@ source:
 appstore:
 	rm -rf $(appstore_build_directory)
 	mkdir -p $(appstore_build_directory)
-	tar cvzf $(appstore_package_name).tar.gz ../$(app_name) \
-	--exclude-vcs \
+	tar --exclude-vcs \
 	--exclude="../$(app_name)/build" \
 	--exclude="../$(app_name)/tests" \
 	--exclude="../$(app_name)/Makefile" \
@@ -147,6 +146,7 @@ appstore:
 	--exclude="../$(app_name)/protractor\.*" \
 	--exclude="../$(app_name)/.*" \
 	--exclude="../$(app_name)/js/.*" \
+	-cvzf $(appstore_package_name).tar.gz ../$(app_name)
 
 .PHONY: test
 test: composer
