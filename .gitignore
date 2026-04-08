@@ -6,3 +6,6 @@ vendor
 *.tar.gz
 node_modules
 tmp/*
+js/
+build.log
+build.js

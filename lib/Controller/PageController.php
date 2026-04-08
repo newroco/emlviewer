@@ -139,11 +139,20 @@ class PageController extends Controller {
             $to = $message->getHeaderValue('To');
             $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
 
+            // Ensure tmp/mpdf directory exists and is writable
+            $tmpDir = __DIR__ . '/../../tmp/mpdf';
+            if (!is_dir($tmpDir)) {
+                mkdir($tmpDir, 0755, true);
+            }
+            if (!is_writable($tmpDir)) {
+                chmod($tmpDir, 0755);
+            }
+
             $response = $this->emlPrint(true);
             $html = $response->render();
             $formerErrorReporting = error_reporting(0);
             $mpdf = new Mpdf([
-                'tempDir' => __DIR__ . '/../../tmp',
+                'tempDir' => $tmpDir,
                 'mode' => 'UTF-8',
                 'format' => 'A4-P',
                 'default_font' => 'arial',
@@ -167,11 +176,24 @@ class PageController extends Controller {
             $mpdf->setAutoBottomMargin = 'stretch';
             $mpdf->SetDisplayMode('fullwidth', 'single');
             $mpdf->WriteHTML($html);
-            $mpdf->Output($filename, 'I');
+            
+            // Generate PDF to string instead of outputting directly
+            $pdfContent = $mpdf->Output($filename, 'S'); // 'S' returns the PDF as a string
             error_reporting($formerErrorReporting);
-            exit;
+            
+            // Return proper HTTP response
+            $pdfResponse = new Http\DataDownloadResponse(
+                $pdfContent,
+                $filename,
+                'application/pdf'
+            );
+            return $pdfResponse;
         } catch (Exception $e) {
-            return new DataResponse(array('msg' => 'Error trying to render pdf: ' . $e->getMessage()), Http::STATUS_OK);
+            $this->logger->error('Error trying to render pdf: ' . $e->getMessage());
+            return new DataResponse(
+                array('msg' => 'Error trying to render pdf: ' . $e->getMessage()),
+                Http::STATUS_INTERNAL_SERVER_ERROR
+            );
         }
     }
  /**
@@ -204,7 +226,8 @@ class PageController extends Controller {
             $params['urlAttachment'] = $this->getAttachmentUrlPrefix();
             //Headers
             $params['from'] = $message->getHeaderValue('From');
-            $params['to'] = $message->getHeaderValue('To');
+            $params['to'] = $message->getHeader('To') ? $message->getHeader('To')->getRawValue() : '';
+            $params['cc'] = $message->getHeader('Cc') ? $message->getHeader('Cc')->getRawValue() : '';
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
             $params['subject'] = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
