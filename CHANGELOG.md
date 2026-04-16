@@ -1,3 +1,6 @@
+## 2.0.3 – 2026-04-16
+- Fixes PSR issue for good (https://github.com/newroco/emlviewer/issues/67 https://github.com/newroco/emlviewer/issues/79)
+
 ## 2.0.2 – 2026-04-08
 - Upgrade to support NC32
 - Added ability to see all CC email addresses in PDF (https://github.com/newroco/emlviewer/issues/75)
