@@ -12,6 +12,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
@@ -86,12 +87,14 @@ class PageController extends Controller {
     {
         $this->shareToken = null;
         $contents = '';
-        if (isset($_GET['share_token']) && !empty($_GET['share_token'])) {
-            $this->shareToken = $_GET['share_token'];
+        $shareToken = $this->request->getParam('share_token');
+        if (!empty($shareToken)) {
+            $this->shareToken = $shareToken;
         }
 
-        if (isset($_GET['eml_file']) && !empty($_GET['eml_file'])) {
-            $this->emlFile = $_GET['eml_file'];
+        $emlFile = $this->request->getParam('eml_file');
+        if (!empty($emlFile)) {
+            $this->emlFile = $emlFile;
         } else if (!$this->shareToken) {
             throw new Exception('No eml file was sent');
         }
@@ -206,7 +209,7 @@ class PageController extends Controller {
      */
     public function emlPrint($print = false): TemplateResponse
     {
-        if (isset($_GET['print'])) {
+        if ($this->request->getParam('print') !== null) {
             $print = true;
         }
         try {

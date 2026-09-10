@@ -27,13 +27,21 @@ class AuthorStorage
     public function emlFileContent(string $filePath): string
     {
         try {
+            if ($this->storage === null) {
+                throw new StorageException('No user storage available');
+            }
+
             $file = $this->storage?->get($filePath);
             if ($file) {
                 return $file->getContent();
             }
         } catch (Exception $e) {
-            if (get_class($e) === "OCP\Files\NotFoundException") throw new NotFoundException('Could not find file: ' . $filePath);
+            if ($e instanceof NotFoundException) {
+                throw new NotFoundException('Could not find file: ' . $filePath);
+            }
             throw $e;
         }
+
+        throw new NotFoundException('Could not find file: ' . $filePath);
     }
 }

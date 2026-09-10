@@ -41,7 +41,11 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 			newSidebar.id = 'app-sidebar'
 			newSidebar.className = 'emlviewer'
 			newSidebar.innerHTML = defaultHtml
-			appContent.after(newSidebar)
+			if (appContent) {
+				appContent.after(newSidebar)
+			} else {
+				document.body.appendChild(newSidebar)
+			}
 
 			const closeIcon = document.querySelector('.icon-close')
 
