@@ -1,5 +1,9 @@
-## 2.0.4 – 2026-09-10
+## 2.1.0 – 2026-09-10
+- Restrict this release line to NC33 only
 - Upgrade to support NC33
+
+## 2.0.5 – 2026-09-10
+- Maintenance release on the NC32 and older compatibility line
 
 ## 2.0.3 – 2026-04-16
 - Fixes PSR issue for good (https://github.com/newroco/emlviewer/issues/67 https://github.com/newroco/emlviewer/issues/79)
