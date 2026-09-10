@@ -1,7 +1,7 @@
 /* eslint-disable jsdoc/require-param-description */
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-import { registerFileAction, FileAction, DefaultType, Permission, getFileActions } from '@nextcloud/files'
+import { registerFileAction, DefaultType, Permission, getFileActions } from '@nextcloud/files'
 import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 (function(OCA) {
@@ -119,21 +119,35 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 	let eml_mime= 'message/rfc822';
 	let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"/></svg>`
-	registerFileAction(new FileAction({
+	registerFileAction({
 		id: 'eml_view',
 		displayName: () => t('view', 'View'),
 		default: DefaultType.DEFAULT,
 		mime: 'message/rfc822',
-		enabled: (nodes) => {
-			return nodes.every((node) => node.mime === eml_mime && (node.permissions & Permission.READ))
+		enabled: ({ nodes }) => {
+			try {
+				if (!Array.isArray(nodes) || nodes.length === 0) {
+					return false
+				}
+
+				return nodes.every((node) => node?.mime === eml_mime && Boolean(node?.permissions & Permission.READ))
+			} catch (error) {
+				console.error(error)
+				return false
+			}
 		},
 		iconSvgInline: () => {return svg},
 		permissions: OC.PERMISSION_READ,
-		async exec(file,view,dir) {
-			OCA.FilesEmlViewer.PreviewEml.show(file.path,sharingToken)
+		async exec({ nodes, folder, view }) {
+			const node = nodes?.[0]
+			if (!node?.path) {
+				return false
+			}
+
+			OCA.FilesEmlViewer.PreviewEml.show(node.path,sharingToken)
 			return true
 		},
-	}))
+	})
 
 	const fileActions = getFileActions()
 	const emlAction = fileActions.find(action => action.mime === eml_mime)

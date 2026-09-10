@@ -1,3 +1,6 @@
+## 2.0.4 – 2026-09-10
+- Upgrade to support NC33
+
 ## 2.0.3 – 2026-04-16
 - Fixes PSR issue for good (https://github.com/newroco/emlviewer/issues/67 https://github.com/newroco/emlviewer/issues/79)
 
