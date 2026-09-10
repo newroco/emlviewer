@@ -113,9 +113,10 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 })(OCA)
 
+
 // OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml)
 
-document.addEventListener('DOMContentLoaded', (event) => {
+function registerEmlFileAction() {
 	let sharingToken = '';
 	if (isPublicShare()) {
 		sharingToken = getSharingToken();
@@ -159,4 +160,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 	if (emlAction) {
 		emlAction.defaultAction = 'eml_view'
 	}
-})
+}
+
+registerEmlFileAction()
