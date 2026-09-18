@@ -21,7 +21,12 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
         <button type="button" style="width: 15em;" id="toggle-text-content">Show raw text content</button>
     <?php } ?>
     <?php if (!empty($_['rawHeaders'])) { ?>
-        <button type="button" style="width: 15em;" id="toggle-raw-headers">Show full headers</button>
+        <button
+                type="button"
+                style="width: 15em;"
+                id="toggle-raw-headers"
+                data-show-label="Show full headers"
+                data-hide-label="Hide full headers">Show full headers</button>
     <?php } ?>
     <a href="<?php p($_['urlPdf']) ?>" id="make-pdf" target="_blank">
         <button type="button" style="width: 150px;">Download as PDF</button>

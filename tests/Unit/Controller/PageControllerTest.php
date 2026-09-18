@@ -53,6 +53,23 @@ class PageControllerTest extends TestCase
         );
     }
 
+    public function testGetRawHeadersStopsAtFirstNonHeaderLineWithoutBlankSeparator(): void
+    {
+        $this->storage->method('emlFileContent')
+            ->willReturn("From: Alice <alice@example.com>\nSubject: Hello\n folded\nBody starts immediately");
+        $this->request->method('getParam')->willReturnMap([
+            ['share_token', null, null],
+            ['eml_file', null, '/mail/test.eml'],
+        ]);
+
+        $controller = $this->createController();
+
+        $this->assertSame(
+            "From: Alice <alice@example.com>\nSubject: Hello\n folded",
+            $controller->getRawHeaders()
+        );
+    }
+
     public function testEmlPrintProvidesRawHeadersToTemplate(): void
     {
         $message = new class {

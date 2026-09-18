@@ -94,7 +94,11 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 							if (emailRawHeadersElement) {
 								emailRawHeadersElement.classList.toggle('fade-out')
 							}
-							OCA.FilesEmlViewer.toggleText(toggleRawHeadersButton, 'Show full headers', 'Hide full headers')
+							OCA.FilesEmlViewer.toggleText(
+								toggleRawHeadersButton,
+								toggleRawHeadersButton.dataset.showLabel,
+								toggleRawHeadersButton.dataset.hideLabel,
+							)
 						})
 					}
 				})

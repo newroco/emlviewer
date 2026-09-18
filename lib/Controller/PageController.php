@@ -332,10 +332,26 @@ class PageController extends Controller {
         }
 
         $normalizedContents = str_replace(["\r\n", "\r"], "\n", $contents);
-        $parts = preg_split("/\n[ \t]*\n/", $normalizedContents, 2);
-        $headers = $parts[0] ?? '';
+        $headerLines = [];
+        foreach (explode("\n", $normalizedContents) as $line) {
+            if ($line === '') {
+                break;
+            }
 
-        return rtrim($headers, "\n");
+            if (preg_match('/^[!-9;-~]+:/', $line) === 1) {
+                $headerLines[] = $line;
+                continue;
+            }
+
+            if ($headerLines !== [] && preg_match('/^[ \t]/', $line) === 1) {
+                $headerLines[] = $line;
+                continue;
+            }
+
+            break;
+        }
+
+        return rtrim(implode("\n", $headerLines), "\n");
     }
 
 	protected function getEmailHTMLContent(Message $message)
