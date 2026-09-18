@@ -79,6 +79,11 @@ class PageController extends Controller {
         return $this->message;
     }
 
+    public function getRawHeaders(): string
+    {
+        return $this->formatRawHeaders($this->getMessage()->getRawHeaders());
+    }
+
     /**
      * @return Message
      * @throws Exception
@@ -234,6 +239,7 @@ class PageController extends Controller {
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
             $params['subject'] = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
+            $params['rawHeaders'] = $this->getRawHeaders();
             $params['nonce'] = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
             $params['htmlContent'] = $this->getEmailHTMLContent($message);
             $params['attachments'] = Array();
@@ -308,9 +314,27 @@ class PageController extends Controller {
                 $this->AppName . '.page.attachment',
                 array(
                     'eml_file' => $this->emlFile,
-                    'share_token' => $this->shareToken
+                'share_token' => $this->shareToken
                 )) . '&att=';
         return $urlAttachment;
+    }
+
+    protected function formatRawHeaders(array $rawHeaders): string
+    {
+        $formattedHeaders = [];
+        foreach ($rawHeaders as $rawHeader) {
+            $headerName = (string)($rawHeader[0] ?? '');
+            if ($headerName === '') {
+                continue;
+            }
+
+            $headerValue = str_replace(["\r\n", "\r"], "\n", (string)($rawHeader[1] ?? ''));
+            $formattedHeaders[] = $headerValue === ''
+                ? $headerName . ':'
+                : $headerName . ': ' . $headerValue;
+        }
+
+        return implode("\n", $formattedHeaders);
     }
 
 	protected function getEmailHTMLContent(Message $message)

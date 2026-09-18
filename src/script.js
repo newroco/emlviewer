@@ -75,6 +75,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 					const makePdfElement = document.getElementById('make-pdf')
 					const toggleTextContentButton = document.getElementById('toggle-text-content')
+					const toggleRawHeadersButton = document.getElementById('toggle-raw-headers')
 					if (toggleTextContentButton) {
 						toggleTextContentButton.addEventListener('click', () => {
 
@@ -85,6 +86,26 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 							OCA.FilesEmlViewer.toggleText(toggleTextContentButton, 'Show raw content', 'Hide raw content')
 						})
 
+					}
+					if (toggleRawHeadersButton) {
+						toggleRawHeadersButton.addEventListener('click', () => {
+
+							const emailRawHeadersElement = document.getElementById(toggleRawHeadersButton.getAttribute('aria-controls') || '')
+							if (!emailRawHeadersElement) {
+								return
+							}
+
+							const isExpanded = toggleRawHeadersButton.getAttribute('aria-expanded') === 'true'
+							const nextExpandedState = !isExpanded
+							emailRawHeadersElement.hidden = !nextExpandedState
+							emailRawHeadersElement.classList.toggle('fade-out', !nextExpandedState)
+							toggleRawHeadersButton.setAttribute('aria-expanded', String(nextExpandedState))
+							OCA.FilesEmlViewer.toggleText(
+								toggleRawHeadersButton,
+								toggleRawHeadersButton.dataset.showLabel,
+								toggleRawHeadersButton.dataset.hideLabel,
+							)
+						})
 					}
 				})
 				.catch((error) => {
