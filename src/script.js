@@ -91,12 +91,14 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 						toggleRawHeadersButton.addEventListener('click', () => {
 
 							const emailRawHeadersElement = document.querySelector('.emlviewer_email_raw_headers_wrapper')
-							if (emailRawHeadersElement) {
-								const isExpanded = toggleRawHeadersButton.getAttribute('aria-expanded') === 'true'
-								emailRawHeadersElement.hidden = isExpanded
-								emailRawHeadersElement.classList.toggle('fade-out', isExpanded)
-								toggleRawHeadersButton.setAttribute('aria-expanded', String(!isExpanded))
+							if (!emailRawHeadersElement) {
+								return
 							}
+
+							const isExpanded = toggleRawHeadersButton.getAttribute('aria-expanded') === 'true'
+							emailRawHeadersElement.hidden = isExpanded
+							emailRawHeadersElement.classList.toggle('fade-out', isExpanded)
+							toggleRawHeadersButton.setAttribute('aria-expanded', String(!isExpanded))
 							OCA.FilesEmlViewer.toggleText(
 								toggleRawHeadersButton,
 								toggleRawHeadersButton.dataset.showLabel,
