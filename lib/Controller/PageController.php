@@ -338,12 +338,12 @@ class PageController extends Controller {
                 break;
             }
 
-            if (preg_match('/^[!-9;-~]+:/', $line) === 1) {
+            if ($this->isHeaderFieldLine($line)) {
                 $headerLines[] = $line;
                 continue;
             }
 
-            if ($headerLines !== [] && preg_match('/^[ \t]/', $line) === 1) {
+            if ($headerLines !== [] && $this->isHeaderContinuationLine($line)) {
                 $headerLines[] = $line;
                 continue;
             }
@@ -352,6 +352,21 @@ class PageController extends Controller {
         }
 
         return rtrim(implode("\n", $headerLines), "\n");
+    }
+
+    private function isHeaderFieldLine(string $line): bool
+    {
+        [$fieldName] = explode(':', $line, 2);
+        if ($fieldName === '' || $fieldName === $line) {
+            return false;
+        }
+
+        return preg_match('/^[^\x00-\x1F\x7F()<>@,;:"\/\[\]?={} \t]+$/', $fieldName) === 1;
+    }
+
+    private function isHeaderContinuationLine(string $line): bool
+    {
+        return preg_match('/^[ \t]/', $line) === 1;
     }
 
 	protected function getEmailHTMLContent(Message $message)

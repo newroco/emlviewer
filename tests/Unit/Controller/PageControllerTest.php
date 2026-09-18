@@ -70,7 +70,7 @@ class PageControllerTest extends TestCase
         );
     }
 
-    public function testEmlPrintProvidesRawHeadersToTemplate(): void
+    public function testEmlPrintProvidesRawHeadersToPreviewTemplate(): void
     {
         $message = new class {
             public function getHeaderValue(string $name): string
