@@ -90,7 +90,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 					if (toggleRawHeadersButton) {
 						toggleRawHeadersButton.addEventListener('click', () => {
 
-							const emailRawHeadersElement = document.querySelector('.emlviewer_email_raw_headers_wrapper')
+							const emailRawHeadersElement = document.getElementById(toggleRawHeadersButton.getAttribute('aria-controls') || '')
 							if (!emailRawHeadersElement) {
 								return
 							}

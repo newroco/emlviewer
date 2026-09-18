@@ -44,7 +44,6 @@ class PageController extends Controller {
     private $urlGenerator;
     private $emlFile;
     private $shareToken;
-    private string $emlContents = '';
 
 	    /**
      * PageController constructor.
@@ -82,11 +81,7 @@ class PageController extends Controller {
 
     public function getRawHeaders(): string
     {
-        if ($this->message === null) {
-            $this->parseEml();
-        }
-
-        return $this->extractRawHeadersFromEmlContent($this->emlContents);
+        return $this->formatRawHeaders($this->getMessage()->getRawHeaders());
     }
 
     /**
@@ -134,7 +129,6 @@ class PageController extends Controller {
             throw new Exception('Could not load contents of file' . $this->emlFile);
         }
 
-        $this->emlContents = $contents;
         $this->message = Message::from($contents, true);
         return $this->message;
     }
@@ -325,48 +319,22 @@ class PageController extends Controller {
         return $urlAttachment;
     }
 
-    protected function extractRawHeadersFromEmlContent(string $contents): string
+    protected function formatRawHeaders(array $rawHeaders): string
     {
-        if ($contents === '') {
-            return '';
-        }
-
-        $normalizedContents = str_replace(["\r\n", "\r"], "\n", $contents);
-        $headerLines = [];
-        foreach (explode("\n", $normalizedContents) as $line) {
-            if ($line === '') {
-                break;
-            }
-
-            if ($this->isHeaderFieldLine($line)) {
-                $headerLines[] = $line;
+        $formattedHeaders = [];
+        foreach ($rawHeaders as $rawHeader) {
+            $headerName = (string)($rawHeader[0] ?? '');
+            if ($headerName === '') {
                 continue;
             }
 
-            if ($headerLines !== [] && $this->isHeaderContinuationLine($line)) {
-                $headerLines[] = $line;
-                continue;
-            }
-
-            break;
+            $headerValue = str_replace(["\r\n", "\r"], "\n", (string)($rawHeader[1] ?? ''));
+            $formattedHeaders[] = $headerValue === ''
+                ? $headerName . ':'
+                : $headerName . ': ' . $headerValue;
         }
 
-        return rtrim(implode("\n", $headerLines), "\n");
-    }
-
-    private function isHeaderFieldLine(string $line): bool
-    {
-        [$fieldName] = explode(':', $line, 2);
-        if ($fieldName === '' || $fieldName === $line) {
-            return false;
-        }
-
-        return preg_match('/^[^\x00-\x1F\x7F()<>@,;:"\/\[\]?={} \t]+$/', $fieldName) === 1;
-    }
-
-    private function isHeaderContinuationLine(string $line): bool
-    {
-        return preg_match('/^[ \t]/', $line) === 1;
+        return implode("\n", $formattedHeaders);
     }
 
 	protected function getEmailHTMLContent(Message $message)

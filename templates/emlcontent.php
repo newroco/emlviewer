@@ -44,8 +44,13 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
     </div>
 <?php } ?>
 <?php if (!empty($_['rawHeaders'])) { ?>
-    <div id="emlviewer-raw-headers" class="emlviewer_email_raw_headers_wrapper fade-out" hidden>
-        Full headers:<br/>
+    <div
+            id="emlviewer-raw-headers"
+            class="emlviewer_email_raw_headers_wrapper fade-out"
+            role="region"
+            aria-labelledby="emlviewer-raw-headers-label"
+            hidden>
+        <span id="emlviewer-raw-headers-label">Full headers:</span><br/>
         <pre class="emlviewer_email_raw_headers"><?php p($_['rawHeaders']) ?></pre>
     </div>
 <?php } ?>

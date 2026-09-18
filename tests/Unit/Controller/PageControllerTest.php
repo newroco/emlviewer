@@ -36,36 +36,34 @@ class PageControllerTest extends TestCase
         $this->urlGenerator = $this->createMock(IURLGenerator::class);
     }
 
-    public function testGetRawHeadersReturnsHeaderBlockOnly(): void
+    public function testGetRawHeadersFormatsParserHeaders(): void
     {
-        $this->storage->method('emlFileContent')
-            ->willReturn("From: Alice <alice@example.com>\r\nSubject: Hello\r\nX-Trace: abc\r\n\tcontinued\r\n\r\nBody line 1");
-        $this->request->method('getParam')->willReturnMap([
-            ['share_token', null, null],
-            ['eml_file', null, '/mail/test.eml'],
-        ]);
+        $message = new class {
+            public function getRawHeaders(): array
+            {
+                return [
+                    ['From', 'Alice <alice@example.com>'],
+                    ['Subject', 'Hello'],
+                    ['X-Trace', "abc\r\n\tcontinued"],
+                ];
+            }
+        };
 
-        $controller = $this->createController();
+        $controller = $this->getMockBuilder(PageController::class)
+            ->setConstructorArgs([
+                'emlviewer',
+                $this->request,
+                $this->storage,
+                $this->shareManager,
+                $this->logger,
+                $this->urlGenerator,
+            ])
+            ->onlyMethods(['getMessage'])
+            ->getMock();
+        $controller->method('getMessage')->willReturn($message);
 
         $this->assertSame(
             "From: Alice <alice@example.com>\nSubject: Hello\nX-Trace: abc\n\tcontinued",
-            $controller->getRawHeaders()
-        );
-    }
-
-    public function testGetRawHeadersStopsAtFirstNonHeaderLineWithoutBlankSeparator(): void
-    {
-        $this->storage->method('emlFileContent')
-            ->willReturn("From: Alice <alice@example.com>\nSubject: Hello\n folded\nBody starts immediately");
-        $this->request->method('getParam')->willReturnMap([
-            ['share_token', null, null],
-            ['eml_file', null, '/mail/test.eml'],
-        ]);
-
-        $controller = $this->createController();
-
-        $this->assertSame(
-            "From: Alice <alice@example.com>\nSubject: Hello\n folded",
             $controller->getRawHeaders()
         );
     }
@@ -159,6 +157,8 @@ class PageControllerTest extends TestCase
         $this->assertStringContainsString('aria-controls="emlviewer-raw-headers"', $output);
         $this->assertStringContainsString('aria-expanded="false"', $output);
         $this->assertStringContainsString('id="emlviewer-raw-headers"', $output);
+        $this->assertStringContainsString('aria-labelledby="emlviewer-raw-headers-label"', $output);
+        $this->assertStringContainsString('id="emlviewer-raw-headers-label"', $output);
         $this->assertStringContainsString('hidden', $output);
         $this->assertStringContainsString('Show full headers', $output);
         $this->assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $output);
