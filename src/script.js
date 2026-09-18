@@ -1,7 +1,7 @@
 /* eslint-disable jsdoc/require-param-description */
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
-import { registerFileAction, FileAction, DefaultType, Permission, getFileActions } from '@nextcloud/files'
+import { registerFileAction, DefaultType, Permission } from '@nextcloud/files'
 import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 (function(OCA) {
@@ -41,7 +41,11 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 			newSidebar.id = 'app-sidebar'
 			newSidebar.className = 'emlviewer'
 			newSidebar.innerHTML = defaultHtml
-			appContent.after(newSidebar)
+			if (appContent) {
+				appContent.after(newSidebar)
+			} else {
+				document.body.appendChild(newSidebar)
+			}
 
 			const closeIcon = document.querySelector('.icon-close')
 
@@ -109,36 +113,59 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 })(OCA)
 
+
 // OC.Plugins.register('OCA.Files.FileList', OCA.FilesEmlViewer.PreviewEml)
 
-document.addEventListener('DOMContentLoaded', (event) => {
-	let sharingToken = '';
-	if (isPublicShare()) {
-		sharingToken = getSharingToken();
+function isEmlNode(node) {
+	if (!node) {
+		return false
 	}
 
-	let eml_mime= 'message/rfc822';
-	let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"/></svg>`
-	registerFileAction(new FileAction({
+	const basename = (node.basename || '').toLowerCase()
+	const path = (node.path || '').toLowerCase()
+
+	return node.mime === 'message/rfc822'
+		|| basename.endsWith('.eml')
+		|| path.endsWith('.eml')
+}
+
+function registerEmlFileAction() {
+	let sharingToken = ''
+	if (isPublicShare()) {
+		sharingToken = getSharingToken()
+	}
+
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"/></svg>`
+	registerFileAction({
 		id: 'eml_view',
 		displayName: () => t('view', 'View'),
 		default: DefaultType.DEFAULT,
+		order: 0,
 		mime: 'message/rfc822',
-		enabled: (nodes) => {
-			return nodes.every((node) => node.mime === eml_mime && (node.permissions & Permission.READ))
+		enabled: ({ nodes }) => {
+			try {
+				if (!Array.isArray(nodes) || nodes.length === 0) {
+					return false
+				}
+
+				return nodes.every((node) => isEmlNode(node) && Boolean((node?.permissions ?? 0) & Permission.READ))
+			} catch (error) {
+				console.error(error)
+				return false
+			}
 		},
 		iconSvgInline: () => {return svg},
 		permissions: OC.PERMISSION_READ,
-		async exec(file,view,dir) {
-			OCA.FilesEmlViewer.PreviewEml.show(file.path,sharingToken)
+		async exec({ nodes }) {
+			const node = nodes?.[0]
+			if (!node?.path) {
+				return false
+			}
+
+			OCA.FilesEmlViewer.PreviewEml.show(node.path, sharingToken)
 			return true
 		},
-	}))
+	})
+}
 
-	const fileActions = getFileActions()
-	const emlAction = fileActions.find(action => action.mime === eml_mime)
-
-	if (emlAction) {
-		emlAction.defaultAction = 'eml_view'
-	}
-})
+registerEmlFileAction()

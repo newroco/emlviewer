@@ -13,7 +13,6 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Security\IContentSecurityPolicyManager;
 use OCP\Util;
 
-use OCA\EmlViewer\Storage\AuthorStorage;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
 
@@ -37,12 +36,12 @@ class Application extends App implements IBootstrap{
     {
         $context->injectFn(function(IEventDispatcher $eventDispatcher) {
             $eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-                Util::addScript(self::APP_ID, self::APP_ID. '-script');
+                Util::addInitScript(self::APP_ID, self::APP_ID . '-script');
                 Util::addStyle(self::APP_ID, self::APP_ID.'-style');
             });
 
             $eventDispatcher->addListener(BeforeTemplateRenderedEvent::class, function () {
-                Util::addScript(self::APP_ID, self::APP_ID. '-script');
+                Util::addInitScript(self::APP_ID, self::APP_ID . '-script');
                 Util::addStyle(self::APP_ID, self::APP_ID.'-style');
             });
         });
