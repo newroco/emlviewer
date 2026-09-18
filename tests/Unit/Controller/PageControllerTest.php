@@ -123,7 +123,7 @@ class PageControllerTest extends TestCase
 
     public function testEmlContentTemplateEscapesRawHeaders(): void
     {
-        $output = $this->renderTemplate('/home/runner/work/emlviewer/emlviewer/templates/emlcontent.php', [
+        $output = $this->renderTemplate($this->templatePath('emlcontent.php'), [
             'from' => 'Alice <alice@example.com>',
             'to' => 'Bob <bob@example.com>',
             'cc' => '',
@@ -145,7 +145,7 @@ class PageControllerTest extends TestCase
 
     public function testPrinterHeadersTemplateDoesNotRenderRawHeaders(): void
     {
-        $output = $this->renderTemplate('/home/runner/work/emlviewer/emlviewer/templates/email_headers.php', [
+        $output = $this->renderTemplate($this->templatePath('email_headers.php'), [
             'nonce' => 'nonce',
             'from' => 'Alice <alice@example.com>',
             'to' => 'Bob <bob@example.com>',
@@ -182,5 +182,10 @@ class PageControllerTest extends TestCase
         include $path;
 
         return (string)ob_get_clean();
+    }
+
+    private function templatePath(string $templateName): string
+    {
+        return dirname(__DIR__, 3) . '/templates/' . $templateName;
     }
 }

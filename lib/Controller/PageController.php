@@ -331,10 +331,11 @@ class PageController extends Controller {
             return '';
         }
 
-        $parts = preg_split("/\r\n\r\n|\n\n|\r\r/", $contents, 2);
+        $normalizedContents = str_replace(["\r\n", "\r"], "\n", $contents);
+        $parts = preg_split("/\n[ \t]*\n/", $normalizedContents, 2);
         $headers = $parts[0] ?? '';
 
-        return str_replace(["\r\n", "\r"], "\n", rtrim($headers, "\r\n"));
+        return rtrim($headers, "\n");
     }
 
 	protected function getEmailHTMLContent(Message $message)
