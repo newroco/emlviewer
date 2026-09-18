@@ -25,6 +25,8 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
                 type="button"
                 style="width: 15em;"
                 id="toggle-raw-headers"
+                aria-controls="emlviewer-raw-headers"
+                aria-expanded="false"
                 data-show-label="Show full headers"
                 data-hide-label="Hide full headers">Show full headers</button>
     <?php } ?>
@@ -42,7 +44,7 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
     </div>
 <?php } ?>
 <?php if (!empty($_['rawHeaders'])) { ?>
-    <div class="emlviewer_email_raw_headers_wrapper fade-out">
+    <div id="emlviewer-raw-headers" class="emlviewer_email_raw_headers_wrapper fade-out" hidden>
         Full headers:<br/>
         <pre class="emlviewer_email_raw_headers"><?php p($_['rawHeaders']) ?></pre>
     </div>

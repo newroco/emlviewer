@@ -156,6 +156,10 @@ class PageControllerTest extends TestCase
         ]);
 
         $this->assertStringContainsString('toggle-raw-headers', $output);
+        $this->assertStringContainsString('aria-controls="emlviewer-raw-headers"', $output);
+        $this->assertStringContainsString('aria-expanded="false"', $output);
+        $this->assertStringContainsString('id="emlviewer-raw-headers"', $output);
+        $this->assertStringContainsString('hidden', $output);
         $this->assertStringContainsString('Show full headers', $output);
         $this->assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $output);
     }

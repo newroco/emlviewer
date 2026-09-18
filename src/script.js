@@ -92,7 +92,10 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 							const emailRawHeadersElement = document.querySelector('.emlviewer_email_raw_headers_wrapper')
 							if (emailRawHeadersElement) {
-								emailRawHeadersElement.classList.toggle('fade-out')
+								const isExpanded = toggleRawHeadersButton.getAttribute('aria-expanded') === 'true'
+								emailRawHeadersElement.hidden = isExpanded
+								emailRawHeadersElement.classList.toggle('fade-out', isExpanded)
+								toggleRawHeadersButton.setAttribute('aria-expanded', String(!isExpanded))
 							}
 							OCA.FilesEmlViewer.toggleText(
 								toggleRawHeadersButton,
