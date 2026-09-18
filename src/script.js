@@ -75,6 +75,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 					const makePdfElement = document.getElementById('make-pdf')
 					const toggleTextContentButton = document.getElementById('toggle-text-content')
+					const toggleRawHeadersButton = document.getElementById('toggle-raw-headers')
 					if (toggleTextContentButton) {
 						toggleTextContentButton.addEventListener('click', () => {
 
@@ -85,6 +86,16 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 							OCA.FilesEmlViewer.toggleText(toggleTextContentButton, 'Show raw content', 'Hide raw content')
 						})
 
+					}
+					if (toggleRawHeadersButton) {
+						toggleRawHeadersButton.addEventListener('click', () => {
+
+							const emailRawHeadersElement = document.querySelector('.emlviewer_email_raw_headers_wrapper')
+							if (emailRawHeadersElement) {
+								emailRawHeadersElement.classList.toggle('fade-out')
+							}
+							OCA.FilesEmlViewer.toggleText(toggleRawHeadersButton, 'Show full headers', 'Hide full headers')
+						})
 					}
 				})
 				.catch((error) => {

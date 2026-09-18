@@ -64,3 +64,18 @@ span.close.icon-close:hover::before {
     padding: 2px 5px;
     font-size: 14px;
 }
+
+.emlviewer .emlviewer_email_raw_headers_wrapper {
+    margin: 12px 0;
+}
+
+.emlviewer .emlviewer_email_raw_headers {
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    background: var(--color-background-dark);
+    font-family: var(--font-monospace);
+}

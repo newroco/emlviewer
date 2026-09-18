@@ -20,6 +20,9 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
     <?php if (!empty($_['textContent'])) { ?>
         <button type="button" style="width: 15em;" id="toggle-text-content">Show raw text content</button>
     <?php } ?>
+    <?php if (!empty($_['rawHeaders'])) { ?>
+        <button type="button" style="width: 15em;" id="toggle-raw-headers">Show full headers</button>
+    <?php } ?>
     <a href="<?php p($_['urlPdf']) ?>" id="make-pdf" target="_blank">
         <button type="button" style="width: 150px;">Download as PDF</button>
     </a>
@@ -31,6 +34,12 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
     <div class="emlviewer_email_text_content fade-out">
         Message:<br/>
         <?php p($_['textContent']) ?>
+    </div>
+<?php } ?>
+<?php if (!empty($_['rawHeaders'])) { ?>
+    <div class="emlviewer_email_raw_headers_wrapper fade-out">
+        Full headers:<br/>
+        <pre class="emlviewer_email_raw_headers"><?php p($_['rawHeaders']) ?></pre>
     </div>
 <?php } ?>
 <div style="flex: 1;">Content:<br/>

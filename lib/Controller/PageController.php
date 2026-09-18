@@ -44,6 +44,7 @@ class PageController extends Controller {
     private $urlGenerator;
     private $emlFile;
     private $shareToken;
+    private string $emlContents = '';
 
 	    /**
      * PageController constructor.
@@ -77,6 +78,15 @@ class PageController extends Controller {
             $this->parseEml();
         }
         return $this->message;
+    }
+
+    public function getRawHeaders(): string
+    {
+        if ($this->message === null) {
+            $this->parseEml();
+        }
+
+        return $this->extractRawHeadersFromEmlContent($this->emlContents);
     }
 
     /**
@@ -124,6 +134,7 @@ class PageController extends Controller {
             throw new Exception('Could not load contents of file' . $this->emlFile);
         }
 
+        $this->emlContents = $contents;
         $this->message = Message::from($contents, true);
         return $this->message;
     }
@@ -234,6 +245,7 @@ class PageController extends Controller {
             $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
             $params['subject'] = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
+            $params['rawHeaders'] = $this->getRawHeaders();
             $params['nonce'] = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
             $params['htmlContent'] = $this->getEmailHTMLContent($message);
             $params['attachments'] = Array();
@@ -308,9 +320,21 @@ class PageController extends Controller {
                 $this->AppName . '.page.attachment',
                 array(
                     'eml_file' => $this->emlFile,
-                    'share_token' => $this->shareToken
+                'share_token' => $this->shareToken
                 )) . '&att=';
         return $urlAttachment;
+    }
+
+    protected function extractRawHeadersFromEmlContent(string $contents): string
+    {
+        if ($contents === '') {
+            return '';
+        }
+
+        $parts = preg_split("/\r\n\r\n|\n\n|\r\r/", $contents, 2);
+        $headers = $parts[0] ?? '';
+
+        return str_replace(["\r\n", "\r"], "\n", rtrim($headers, "\r\n"));
     }
 
 	protected function getEmailHTMLContent(Message $message)
