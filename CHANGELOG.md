@@ -1,3 +1,11 @@
+## 2.1.1-beta.1 – 2026-10-19
+- Community beta for Nextcloud 35, based on the changes proposed upstream.
+- Fix preview, printing, and PDF export compatibility; use Nextcloud-managed temporary storage.
+- Decode MIME-encoded address names and preserve Unicode and inline CID images.
+- Keep the Files sidebar intact, fill the available preview height, and provide a standalone multi-page print layout.
+- Enforce public-share authentication and download permissions; sanitize email HTML and escape output.
+- Include regression tests with synthetic sample data.
+
 ## 2.1.0 – 2026-09-10
 - Restrict this release line to NC33 only
 - Upgrade to support NC33
