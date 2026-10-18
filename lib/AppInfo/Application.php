@@ -67,8 +67,10 @@ class Application extends App implements IBootstrap{
             $policy->addAllowedMediaDomain('\'self\'');
             $policy->addAllowedMediaDomain('blob:');
 
-            $policy->addAllowedChildSrcDomain('\'self\'');
-            $policy->addAllowedChildSrcDomain('blob:');
+            $policy->addAllowedFrameDomain('\'self\'');
+            $policy->addAllowedFrameDomain('blob:');
+            $policy->addAllowedWorkerSrcDomain('\'self\'');
+            $policy->addAllowedWorkerSrcDomain('blob:');
 
             $policy->addAllowedConnectDomain('\'self\'');
 

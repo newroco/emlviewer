@@ -2,36 +2,44 @@ li[data-id='emlviewer'] {
     display: none !important;
 }
 
-.fade-out {
+.emlviewer .fade-out {
     display: none;
 }
 
 .emlviewer_email_html_content {
     width: 100%;
     min-height: 200px;
-    height: 100%;
+    flex: 1;
+    display: block;
+    box-sizing: border-box;
+    border: 0;
     background-color: rgba(255, 255, 255, 0.7);
 }
 
-#app-sidebar.emlviewer {
+#emlviewer-sidebar.emlviewer {
     width: 100%;
     max-width: none;
-    top: 0px;
-    margin-top: 50px;
-    position: absolute;
+    top: var(--header-height, 50px);
+    margin-top: 0;
+    position: fixed;
+    bottom: 0;
+    overflow: auto;
+    z-index: 2000;
+    background: var(--color-main-background);
 }
 
-#app-sidebar.emlviewer .close {
+#emlviewer-sidebar.emlviewer .emlviewer-close {
     cursor: pointer;
     position: absolute;
     top: 0;
     right: 0;
     z-index: 999;
 }
-#app-sidebar.emlviewer .icon-close {
+#emlviewer-sidebar.emlviewer .emlviewer-close {
     display: block;
     width: 44px;
     height: 44px;
+    font-size: 28px;
 }
 span.close.icon-close::before {
     background: var(--color-background-darker);
@@ -49,15 +57,43 @@ span.close.icon-close:hover::before {
 .emlviewer .mail-content {
     position: relative;
     display: flex;
-    height: 98%;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
     text-align: left;
     padding-left: 50px;
     padding-right: 25px;
     padding-top: 25px;
+    padding-bottom: 16px;
     width: 100%;
     flex-direction: column;
+}
+
+.emlviewer .mail-content > * {
+    flex-shrink: 0;
+}
+
+.emlviewer .emlviewer-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 220px;
+    min-height: 220px;
+}
+
+.emlviewer .buttonWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.emlviewer .emlviewer_email_text_content {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 35vh;
+    overflow: auto;
 }
 
 .emlviewer .emlviewer_email_headers {

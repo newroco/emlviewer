@@ -15,8 +15,11 @@
     <bugs>https://github.com/newroco/emlviewer/issues</bugs>
     <repository type="git">https://github.com/newroco/emlviewer.git</repository>
     <dependencies>
-        <php min-version="8.1" max-version="8.4" min-int-size="64"/>
+        <php min-version="8.3" max-version="8.5" min-int-size="64"/>
+        <lib>gd</lib>
+        <lib>dom</lib>
+        <lib>intl</lib>
         <lib>mbstring</lib>
-        <nextcloud min-version="33" max-version="33"/>
+        <nextcloud min-version="35" max-version="35"/>
     </dependencies>
 </info>
