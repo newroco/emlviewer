@@ -382,6 +382,8 @@ class PageController extends Controller {
         //handle attachment CID urls
         $atts = $message->getAllAttachmentParts();
         $urlAttachment = $this->getAttachmentUrlPrefix();
+        $contentIdUrls = [];
+        $filenameUrls = [];
         foreach ($atts as $index => $part) {
             $attName = self::getPartFilename($part, $index);
             $attNewSrc = $urlAttachment . $index;
@@ -389,19 +391,67 @@ class PageController extends Controller {
             if (stripos($contentType, 'image') !== FALSE) {
                 //base64 encode images, for better PDF export support and display performance
                 $content = $part->getContent();
+                // HTMLPurifier accepts PNG data URLs but not WebP data URLs.
+                if (strtolower($contentType) === 'image/webp' && function_exists('imagecreatefromwebp')) {
+                    $image = @imagecreatefromstring($content);
+                    if ($image !== false) {
+                        imagesavealpha($image, true);
+                        ob_start();
+                        try {
+                            $converted = imagepng($image);
+                            $png = ob_get_contents();
+                        } finally {
+                            ob_end_clean();
+                        }
+                        if ($converted) {
+                            $content = $png;
+                            $contentType = 'image/png';
+                        }
+                    }
+                }
                 $attNewSrc = 'data:' . $contentType . ';base64,' . base64_encode($content);
             }
             $contentId = trim($part->getHeaderValue('Content-ID') ?? '', '<>');
             if ($contentId !== '') {
-                $html = str_ireplace('cid:' . $contentId, $attNewSrc, $html);
+                $contentIdUrls[$contentId] ??= $attNewSrc;
             }
-            $html = str_ireplace('cid:' . $attName, $attNewSrc, $html);
+            $filenameUrls[$attName] ??= $attNewSrc;
         }
+        // Actual Content-IDs take precedence over the legacy filename fallback.
+        $html = $this->resolveInlineUrls($html, $contentIdUrls + $filenameUrls);
         // Email HTML is untrusted, especially when rendered as a full print page.
         $config = \HTMLPurifier_Config::createDefault();
         $config->set('Cache.DefinitionImpl', null);
         $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'data' => true]);
         return (new \HTMLPurifier($config))->purify($html);
+    }
+
+    private function resolveInlineUrls(string $html, array $urls): string
+    {
+        if ($html === '' || $urls === [] || stripos($html, 'cid:') === false) {
+            return $html;
+        }
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $document = new \DOMDocument('1.0', 'UTF-8');
+            $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET);
+            $xpath = new \DOMXPath($document);
+            foreach ($xpath->query('//@src | //@href | //@background | //@poster') as $attribute) {
+                $url = trim($attribute->value);
+                if (strncasecmp($url, 'cid:', 4) !== 0) {
+                    continue;
+                }
+                // RFC 2392 encodes the Content-ID as a URL; '+' remains literal.
+                $contentId = rawurldecode(substr($url, 4));
+                if (isset($urls[$contentId])) {
+                    $attribute->ownerElement->setAttribute($attribute->name, $urls[$contentId]);
+                }
+            }
+            return $document->saveHTML();
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
     }
 
     /**

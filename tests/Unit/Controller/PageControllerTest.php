@@ -25,6 +25,7 @@ class PageControllerTest extends TestCase {
         );
         $urls = $this->createStub(IURLGenerator::class);
         $urls->method('linkTo')->willReturnCallback(fn ($app, $file) => '/apps/' . $app . '/' . $file);
+        $urls->method('linkToRoute')->willReturnCallback(fn ($route, $params = []) => '/' . $route . '?' . http_build_query($params));
         return new PageController('emlviewer', $request, $storage,
             $this->createStub(IManager::class), new NullLogger(),
             $urls, \OCP\Server::get(ITempManager::class),
@@ -128,5 +129,125 @@ class PageControllerTest extends TestCase {
         self::assertStringNotContainsString('printButton', $html);
         self::assertStringNotContainsString('<script', $html);
         self::assertStringNotContainsString('<link', $html);
+    }
+
+    private function inlineEmail(string $html, array $attachments): PageController {
+        $body = "--inline-boundary\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n$html\r\n";
+        foreach ($attachments as [$id, $filename, $type, $content]) {
+            $body .= "--inline-boundary\r\nContent-Type: $type; name=\"$filename\"\r\n"
+                . "Content-Disposition: inline; filename=\"$filename\"\r\nContent-ID: <$id>\r\n"
+                . "Content-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($content), 76, "\r\n");
+        }
+        return $this->controller($body . "--inline-boundary--\r\n", 'multipart/related; boundary="inline-boundary"');
+    }
+
+    private function png(int $red, int $green): string {
+        $image = imagecreatetruecolor(2, 2);
+        imagefill($image, 0, 0, imagecolorallocate($image, $red, $green, 0));
+        ob_start();
+        imagepng($image);
+        return ob_get_clean();
+    }
+
+    private function imageSources(string $html): array {
+        if ($html === '') {
+            return [];
+        }
+        $document = new \DOMDocument();
+        $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        return array_map(fn ($image) => $image->getAttribute('src'), iterator_to_array($document->getElementsByTagName('img')));
+    }
+
+    public function testInlineContentIdsMatchCompleteUrlsWithoutChangingText(): void {
+        $red = $this->png(255, 0);
+        $green = $this->png(0, 255);
+        $html = $this->inlineEmail('<p>Grüße: cid:image1 and cid:image10.</p>'
+            . '<img src="cid:image1" alt="cid:image1"><img src="cid:image10">', [
+                ['image1', 'red.png', 'image/png', $red],
+                ['image10', 'green.png', 'image/png', $green],
+            ])->emlPrint()->getParams()['htmlContent'];
+        self::assertSame(['data:image/png;base64,' . base64_encode($red), 'data:image/png;base64,' . base64_encode($green)], $this->imageSources($html));
+        self::assertStringContainsString('Grüße: cid:image1 and cid:image10.', $html);
+        self::assertStringContainsString('alt="cid:image1"', $html);
+    }
+
+    public function testInlineFilenameFallbackMatchesCompleteUrls(): void {
+        $red = $this->png(255, 0);
+        $green = $this->png(0, 255);
+        $html = $this->inlineEmail('<img src="cid:image1"><img src="cid:image10">', [
+            ['other-first', 'image1', 'image/png', $red],
+            ['other-second', 'image10', 'image/png', $green],
+        ])->emlPrint()->getParams()['htmlContent'];
+        self::assertSame(['data:image/png;base64,' . base64_encode($red), 'data:image/png;base64,' . base64_encode($green)], $this->imageSources($html));
+    }
+
+    public function testInlineContentIdTakesPriorityOverAnotherAttachmentsFilename(): void {
+        $red = $this->png(255, 0);
+        $green = $this->png(0, 255);
+        $html = $this->inlineEmail('<img src="cid:logo">', [
+            ['other', 'logo', 'image/png', $red],
+            ['logo', 'green.png', 'image/png', $green],
+        ])->emlPrint()->getParams()['htmlContent'];
+        self::assertSame(['data:image/png;base64,' . base64_encode($green)], $this->imageSources($html));
+    }
+
+    public function testInlineContentIdsDecodeUrlEscapesAndHtmlEntities(): void {
+        $png = $this->png(255, 0);
+        $html = $this->inlineEmail('<img src=CiD:logo%2Fpart+id%40example.test><img src="cid:a&amp;b@example.test">', [
+            ['logo/part+id@example.test', 'encoded.png', 'image/png', $png],
+            ['a&b@example.test', 'entity.png', 'image/png', $png],
+        ])->emlPrint()->getParams()['htmlContent'];
+        self::assertSame(array_fill(0, 2, 'data:image/png;base64,' . base64_encode($png)), $this->imageSources($html));
+    }
+
+    public function testInlineAttachmentLinkPreservesItsQueryParameters(): void {
+        $html = $this->inlineEmail('<a href="cid:document">Attachment</a>', [
+            ['document', 'sample.bin', 'application/octet-stream', 'Synthetic attachment'],
+        ])->emlPrint()->getParams()['htmlContent'];
+        $document = new \DOMDocument();
+        $document->loadHTML($html, LIBXML_NONET);
+        self::assertSame('/emlviewer.page.attachment?eml_file=%2Fsample.eml&att=0',
+            $document->getElementsByTagName('a')->item(0)->getAttribute('href'));
+    }
+
+    public function testWebpIsConvertedToPngForPreviewPrintAndPdf(): void {
+        if (!function_exists('imagewebp')) {
+            self::markTestSkipped('GD WebP support is not available.');
+        }
+        $image = imagecreatetruecolor(2, 2);
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+        imagefill($image, 0, 0, imagecolorallocatealpha($image, 255, 0, 0, 127));
+        imagesetpixel($image, 1, 1, imagecolorallocatealpha($image, 0, 255, 0, 0));
+        ob_start();
+        imagewebp($image);
+        $controller = $this->inlineEmail('<img src="cid:webp-image">', [
+            ['webp-image', 'sample.webp', 'image/webp', ob_get_clean()],
+        ]);
+        $html = $controller->emlPrint()->getParams()['htmlContent'];
+        $sources = $this->imageSources($html);
+        self::assertCount(1, $sources);
+        self::assertStringStartsWith('data:image/png;base64,', $sources[0]);
+        $png = base64_decode(substr($sources[0], strlen('data:image/png;base64,')), true);
+        self::assertSame('image/png', getimagesizefromstring($png)['mime']);
+        $converted = imagecreatefromstring($png);
+        self::assertSame(2, imagesx($converted));
+        self::assertSame(127, imagecolorsforindex($converted, imagecolorat($converted, 0, 0))['alpha']);
+        self::assertStringContainsString($sources[0], $controller->emlPrint(true)->render());
+        $pdf = $controller->pdfPrint();
+        self::assertSame(200, $pdf->getStatus());
+        self::assertStringStartsWith('%PDF-', $pdf->render());
+        self::assertMatchesRegularExpression('~/Subtype\s*/Image\b~', $pdf->render());
+    }
+
+    public function testInvalidWebpDoesNotBreakRenderingOrBypassSanitization(): void {
+        $controller = $this->inlineEmail('<img src="cid:invalid" onerror="alert(1)"><p>Safe</p>', [
+            ['invalid', 'invalid.webp', 'image/webp', '<svg onload="alert(2)"></svg>'],
+        ]);
+        $html = $controller->emlPrint()->getParams()['htmlContent'];
+        self::assertSame([], $this->imageSources($html));
+        self::assertStringContainsString('<p>Safe</p>', $html);
+        self::assertStringNotContainsString('onerror', $html);
+        self::assertSame(200, $controller->pdfPrint()->getStatus());
     }
 }
