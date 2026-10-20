@@ -9,19 +9,29 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Http\StandaloneTemplateResponse;
 use OCP\IRequest;
 use OCP\IURLGenerator;
+use OCP\ITempManager;
+use OCP\ISession;
+use OCP\AppFramework\PublicShareController;
+use OCP\Files\File;
+use OCP\Files\Folder;
+use OCP\Files\NotPermittedException;
+use OCP\Share\IShare;
 use Psr\Log\LoggerInterface;
 use OCP\Share\IManager;
 
 use tidy;
 use ZBateson\MailMimeParser\Message;
+use ZBateson\MailMimeParser\Header\AddressHeader;
 use Mpdf\Mpdf;
 
 use OCA\EmlViewer\Storage\AuthorStorage;
@@ -44,6 +54,8 @@ class PageController extends Controller {
     private $urlGenerator;
     private $emlFile;
     private $shareToken;
+    private ITempManager $tempManager;
+    private ISession $session;
 
 	    /**
      * PageController constructor.
@@ -57,7 +69,9 @@ class PageController extends Controller {
 					AuthorStorage $AuthorStorage,
 					IManager $shareManager,
 					LoggerInterface $logger,
-					IURLGenerator $urlGenerator)
+					IURLGenerator $urlGenerator,
+                    ITempManager $tempManager,
+                    ISession $session)
     {
         parent::__construct($AppName, $request);
         $this->AppName = $AppName;
@@ -66,6 +80,8 @@ class PageController extends Controller {
         $this->logger = $logger;
         $this->message = null;
         $this->urlGenerator = $urlGenerator;
+        $this->tempManager = $tempManager;
+        $this->session = $session;
     }
 
     /**
@@ -99,23 +115,30 @@ class PageController extends Controller {
             throw new Exception('No eml file was sent');
         }
         if ($this->shareToken) {
-            /* shared file or directory */
+            if (!$this->shareManager->shareApiEnabled() || !$this->shareManager->shareApiAllowLinks()) {
+                throw new NotPermittedException('Public sharing is disabled');
+            }
             $share = $this->shareManager->getShareByToken($this->shareToken);
+            if (!in_array($share->getShareType(), [IShare::TYPE_LINK, IShare::TYPE_EMAIL], true)
+                || $share->isExpired() || !$share->canSeeContent() || !$share->canDownload()) {
+                throw new NotPermittedException('This share does not allow reading email content');
+            }
+            if ($share->isPasswordProtected()) {
+                $tokens = json_decode($this->session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND) ?? '[]', true);
+                if (!is_array($tokens) || !is_string($tokens[$this->shareToken] ?? null)
+                    || !hash_equals($share->getPassword(), $tokens[$this->shareToken])) {
+                    throw new NotPermittedException('Authenticate to the public share first');
+                }
+            }
             $node = $share->getNode();
-            $type = $node->getType();
-
-            /* shared directory, need file path to continue, */
-            if ($type !== \OCP\Files\FileInfo::TYPE_FOLDER) {
-                $extension = strtolower($node->getExtension());
-                if ($extension == 'eml') {
-                    $contents = $node->getContent();
+            if ($node instanceof Folder) {
+                if (empty($this->emlFile) || in_array('..', explode('/', str_replace('\\', '/', $this->emlFile)), true)) {
+                    throw new NotPermittedException('Invalid path inside shared folder');
                 }
-            } else {//this is a directory
-                $fileNode = $node->get($this->emlFile);
-                $extension = strtolower($fileNode->getExtension());
-                if ($extension == 'eml') {
-                    $contents = $fileNode->getContent();
-                }
+                $node = $node->get($this->emlFile);
+            }
+            if ($node instanceof File && strtolower($node->getExtension()) === 'eml' && $node->isReadable()) {
+                $contents = $node->getContent();
             }
         } else {
             $contents = $this->storage->emlFileContent($this->emlFile);
@@ -134,6 +157,9 @@ class PageController extends Controller {
      * @NoCSRFRequired
      * @NoAdminRequired
      */
+    #[PublicPage]
+    #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function pdfPrint(): Response
     {
         try {
@@ -142,18 +168,18 @@ class PageController extends Controller {
             $to = $message->getHeaderValue('To');
             $filename = 'Message from ' . $from . ' to ' . $to . '.pdf';
 
-            // Ensure tmp/mpdf directory exists and is writable
-            $tmpDir = __DIR__ . '/../../tmp/mpdf';
-            if (!is_dir($tmpDir)) {
-                mkdir($tmpDir, 0755, true);
-            }
-            if (!is_writable($tmpDir)) {
-                chmod($tmpDir, 0755);
+            $tmpDir = $this->tempManager->getTemporaryFolder('emlviewer-pdf');
+            if ($tmpDir === false) {
+                throw new Exception('Could not create temporary PDF directory');
             }
 
             $response = $this->emlPrint(true);
-            $html = $response->render();
-            $formerErrorReporting = error_reporting(0);
+            if ($response->getStatus() !== Http::STATUS_OK) {
+                throw new Exception('Could not prepare email for PDF export');
+            }
+            $params = $response->getParams();
+            $headers = new TemplateResponse($this->AppName, 'email_headers', $params, TemplateResponse::RENDER_AS_BLANK);
+            $html = $this->getPrintableHtml($params['htmlContent'], $headers->render());
             $mpdf = new Mpdf([
                 'tempDir' => $tmpDir,
                 'mode' => 'UTF-8',
@@ -173,7 +199,6 @@ class PageController extends Controller {
                 'author' => 'nextcloud ' . $this->AppName
             ]);
             //$mpdf->showImageErrors = true;
-            $mpdf->curlAllowUnsafeSslRequests = true;
             $mpdf->curlTimeout = 1000;
             $mpdf->setAutoTopMargin = 'stretch';
             $mpdf->setAutoBottomMargin = 'stretch';
@@ -182,7 +207,6 @@ class PageController extends Controller {
             
             // Generate PDF to string instead of outputting directly
             $pdfContent = $mpdf->Output($filename, 'S'); // 'S' returns the PDF as a string
-            error_reporting($formerErrorReporting);
             
             // Return proper HTTP response
             $pdfResponse = new Http\DataDownloadResponse(
@@ -195,7 +219,7 @@ class PageController extends Controller {
             $this->logger->error('Error trying to render pdf: ' . $e->getMessage());
             return new DataResponse(
                 array('msg' => 'Error trying to render pdf: ' . $e->getMessage()),
-                Http::STATUS_INTERNAL_SERVER_ERROR
+                $e instanceof NotPermittedException ? Http::STATUS_FORBIDDEN : Http::STATUS_INTERNAL_SERVER_ERROR
             );
         }
     }
@@ -207,6 +231,9 @@ class PageController extends Controller {
      *
      * @return TemplateResponse
      */
+    #[PublicPage]
+    #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function emlPrint($print = false): TemplateResponse
     {
         if ($this->request->getParam('print') !== null) {
@@ -222,74 +249,33 @@ class PageController extends Controller {
             //URLs
             $params['urlPrinter'] = $this->urlGenerator->linkToRoute(
                 $this->AppName . '.page.emlPrint',
-                array('eml_file' => $this->emlFile, 'print' => ''));
+                array('eml_file' => $this->emlFile, 'share_token' => $this->shareToken, 'print' => ''));
             $params['urlPdf'] = $this->urlGenerator->linkToRoute(
                 $this->AppName . '.page.pdfPrint',
-                array('eml_file' => $this->emlFile));
+                array('eml_file' => $this->emlFile, 'share_token' => $this->shareToken));
             $params['urlAttachment'] = $this->getAttachmentUrlPrefix();
             //Headers
-            $params['from'] = $message->getHeaderValue('From');
-            $params['to'] = $message->getHeader('To') ? $message->getHeader('To')->getRawValue() : '';
-            $params['cc'] = $message->getHeader('Cc') ? $message->getHeader('Cc')->getRawValue() : '';
-            $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date'));
+            $params['from'] = $this->formatAddressHeader($message, 'From');
+            $params['to'] = $this->formatAddressHeader($message, 'To');
+            $params['cc'] = $this->formatAddressHeader($message, 'Cc');
+            $params['date'] = preg_replace('/\W\w+\s*(\W*)$/', '$1', $message->getHeaderValue('Date') ?? '');
             $params['subject'] = $message->getHeaderValue('subject');
             $params['textContent'] = $message->getTextContent();
-            $params['nonce'] = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
             $params['htmlContent'] = $this->getEmailHTMLContent($message);
             $params['attachments'] = Array();
             //handle attachments
             $atts = $message->getAllAttachmentParts();
             foreach ($atts as $ind => $part) {
-                $params['attachments'][$ind] = self::getPartFilename($part);
+                $params['attachments'][$ind] = self::getPartFilename($part, $ind);
             }
 
 
             if ($print) {
-                $headers = new TemplateResponse($this->AppName, 'email_headers', $params, $renderAs = '');
-                //$csp->addAllowedScriptDomain('\'unsafe-inline\'');
-                $headers->setContentSecurityPolicy($csp);
-                $headersHtml = $headers->render();
-
-                $whatToInsertBefore = null;
-
-                if ($params['htmlContent']) {
-                    $doc = new \DOMDocument();
-                    // modify state
-                    $libxml_previous_state = libxml_use_internal_errors(true);
-                    $doc->loadHTML($params['htmlContent']);
-                    //ignore HTML errors
-                    libxml_clear_errors();
-                    // restore state
-                    libxml_use_internal_errors($libxml_previous_state);
-
-                    //fix usual e-mail table in table pattern
-                    /* $table = $doc->getElementsByTagName('table');
-                     if($table->length > 0) {
-                         $table = $table->item(0);
-                         $innerTable = $this->extractTableInTable($table);
-                         if ($table !== $innerTable) {
-                             //$innerTable2 = $innerTable->cloneNode(true);
-                             //$table->parentNode->appendChild($innerTable2);
-                             //$table->parentNode->removeChild($table);
-                             //$whatToInsertBefore = $innerTable2;
-                             $whatToInsertBefore = $innerTable;
-                         }
-                     }*/
-
-                    $fragment = $doc->createDocumentFragment();
-                    $fragment->appendXML($headersHtml);
-                    if (!$whatToInsertBefore) {
-                        $body = $doc->getElementsByTagName('body')->item(0);
-                        $whatToInsertBefore = $body->firstChild;
-                    }
-                    $whatToInsertBefore->parentNode->insertBefore($fragment, $whatToInsertBefore);
-
-                    $params['htmlContent'] = $doc->saveHTML();
-                } else {
-                    $params['htmlContent'] = 'no content in e-mail body';
-                }
-
-                $response = new TemplateResponse($this->AppName, 'printcontent', $params, $renderAs = 'blank');  // templates/printcontent.php
+                $params['printScript'] = $this->urlGenerator->linkTo($this->AppName, 'js/emlviewer-print.js',
+                    ['v' => hash_file('sha256', __DIR__ . '/../../js/emlviewer-print.js')]);
+                $params['printStyle'] = $this->urlGenerator->linkTo($this->AppName, 'css/emlviewer-print.css',
+                    ['v' => hash_file('sha256', __DIR__ . '/../../css/emlviewer-print.css')]);
+                $response = new StandaloneTemplateResponse($this->AppName, 'printcontent', $params, TemplateResponse::RENDER_AS_BLANK);
             } else {
                 $response = new TemplateResponse($this->AppName, 'emlcontent', $params, $renderAs = '');  // templates/emlcontent.php
             }
@@ -299,9 +285,64 @@ class PageController extends Controller {
             $response = new TemplateResponse($this->AppName, 'error', [
                 'message' => 'Error trying to obtain eml data: ' . $e->getMessage()],
                 $renderAs = '');
+            $response->setStatus($e instanceof NotPermittedException ? Http::STATUS_FORBIDDEN : Http::STATUS_BAD_REQUEST);
         }
         return $response;
     }
+    private function formatAddressHeader(Message $message, string $name): string
+    {
+        $header = $message->getHeader($name);
+        if (!$header instanceof AddressHeader) {
+            return '';
+        }
+
+        $addresses = [];
+        foreach ($header->getAddresses() as $address) {
+            $displayName = $address->getName();
+            $email = $address->getEmail();
+            if ($displayName === null || $displayName === '') {
+                $addresses[] = $email;
+                continue;
+            }
+            // Keep names with commas unambiguous within a recipient list.
+            if (strpbrk($displayName, ',;"<>') !== false) {
+                $displayName = '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $displayName) . '"';
+            }
+            $addresses[] = $displayName . ' <' . $email . '>';
+        }
+        return implode(', ', $addresses);
+    }
+
+    protected function getPrintableHtml(string $html, string $headers): string
+    {
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $document = new \DOMDocument('1.0', 'UTF-8');
+            $document->loadHTML('<?xml encoding="UTF-8">' . ($html ?: '<html><body></body></html>'), LIBXML_NONET);
+            $headerDocument = new \DOMDocument('1.0', 'UTF-8');
+            $headerDocument->loadHTML('<?xml encoding="UTF-8"><html><body>' . $headers . '</body></html>', LIBXML_NONET);
+            $body = $document->getElementsByTagName('body')->item(0);
+            if ($body === null) {
+                $body = $document->createElement('body');
+                $document->documentElement->appendChild($body);
+            }
+            $fragment = $document->createDocumentFragment();
+            foreach ($headerDocument->getElementsByTagName('body')->item(0)->childNodes as $child) {
+                $fragment->appendChild($document->importNode($child, true));
+            }
+            $body->insertBefore($fragment, $body->firstChild);
+            foreach (iterator_to_array($document->childNodes) as $child) {
+                if ($child->nodeType === XML_PI_NODE) {
+                    $document->removeChild($child);
+                }
+            }
+            return $document->saveHTML();
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
+    }
+
 	private function getAttachmentUrlPrefix()
     {
         $urlAttachment = $this->urlGenerator->linkToRoute(
@@ -319,11 +360,11 @@ class PageController extends Controller {
 		$htmlContent = $message->getHtmlContent();
 
 		if (!empty($htmlContent)) {
-			$html = str_replace('"', '\'', $htmlContent);
+			$html = $htmlContent;
 		} else {
 			$textContent = $message->getTextContent();
 			if($textContent){
-				$html =  nl2br($textContent);
+				$html = nl2br(htmlspecialchars($textContent, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
 			}
 		}
 
@@ -341,6 +382,8 @@ class PageController extends Controller {
         //handle attachment CID urls
         $atts = $message->getAllAttachmentParts();
         $urlAttachment = $this->getAttachmentUrlPrefix();
+        $contentIdUrls = [];
+        $filenameUrls = [];
         foreach ($atts as $index => $part) {
             $attName = self::getPartFilename($part, $index);
             $attNewSrc = $urlAttachment . $index;
@@ -348,14 +391,66 @@ class PageController extends Controller {
             if (stripos($contentType, 'image') !== FALSE) {
                 //base64 encode images, for better PDF export support and display performance
                 $content = $part->getContent();
+                // HTMLPurifier accepts PNG data URLs but not WebP data URLs.
+                if (strtolower($contentType) === 'image/webp' && function_exists('imagecreatefromwebp')) {
+                    $image = @imagecreatefromstring($content);
+                    if ($image !== false) {
+                        imagesavealpha($image, true);
+                        ob_start();
+                        try {
+                            $converted = imagepng($image);
+                            $png = ob_get_contents();
+                        } finally {
+                            ob_end_clean();
+                        }
+                        if ($converted) {
+                            $content = $png;
+                            $contentType = 'image/png';
+                        }
+                    }
+                }
                 $attNewSrc = 'data:' . $contentType . ';base64,' . base64_encode($content);
             }
-            $html = preg_replace('/' . preg_quote('cid:' . $attName) . '/ixm', $attNewSrc, $html);
+            $contentId = trim($part->getHeaderValue('Content-ID') ?? '', '<>');
+            if ($contentId !== '') {
+                $contentIdUrls[$contentId] ??= $attNewSrc;
+            }
+            $filenameUrls[$attName] ??= $attNewSrc;
         }
-        if(function_exists('mb_convert_encoding')){
-            return mb_convert_encoding($html, 'html-entities', 'UTF-8');
-        } else {
+        // Actual Content-IDs take precedence over the legacy filename fallback.
+        $html = $this->resolveInlineUrls($html, $contentIdUrls + $filenameUrls);
+        // Email HTML is untrusted, especially when rendered as a full print page.
+        $config = \HTMLPurifier_Config::createDefault();
+        $config->set('Cache.DefinitionImpl', null);
+        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'data' => true]);
+        return (new \HTMLPurifier($config))->purify($html);
+    }
+
+    private function resolveInlineUrls(string $html, array $urls): string
+    {
+        if ($html === '' || $urls === [] || stripos($html, 'cid:') === false) {
             return $html;
+        }
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $document = new \DOMDocument('1.0', 'UTF-8');
+            $document->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NONET);
+            $xpath = new \DOMXPath($document);
+            foreach ($xpath->query('//@src | //@href | //@background | //@poster') as $attribute) {
+                $url = trim($attribute->value);
+                if (strncasecmp($url, 'cid:', 4) !== 0) {
+                    continue;
+                }
+                // RFC 2392 encodes the Content-ID as a URL; '+' remains literal.
+                $contentId = rawurldecode(substr($url, 4));
+                if (isset($urls[$contentId])) {
+                    $attribute->ownerElement->setAttribute($attribute->name, $urls[$contentId]);
+                }
+            }
+            return $document->saveHTML();
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
         }
     }
 
@@ -389,6 +484,9 @@ class PageController extends Controller {
      * @NoCSRFRequired
      * @NoAdminRequired
      */
+    #[PublicPage]
+    #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function attachment(int $att = 0): Response
     {
         $att = intval($att);

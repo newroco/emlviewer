@@ -1,0 +1,28 @@
+From: =?utf-8?Q?Pr=C3=BCfabsender?= <sender@example.test>
+To: Testperson Eins <recipient-one@example.test>, Testperson Zwei <recipient-two@example.test>,
+	=?utf-8?B?UHLDvGZlbXBmw6RuZ2VyIERyZWk=?= <recipient-three@example.test>
+Cc: =?iso-8859-1?Q?Pr=FCfkopie?= <copy@example.test>
+Subject: EML Viewer sample email
+Date: Sun, 18 Oct 2026 12:00:00 +0200
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="emlviewer-boundary"
+
+--emlviewer-boundary
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><h1>Beispielnachricht</h1><p title="Grüße">Grüße &amp; Sonderzeichen: äöü ß</p><img src="cid:logo@example.test" alt="Inline logo"></body></html>
+--emlviewer-boundary
+Content-Type: image/png; name="logo.png"
+Content-Disposition: inline; filename="logo.png"
+Content-ID: <logo@example.test>
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=
+--emlviewer-boundary
+Content-Type: text/plain; charset=UTF-8; name="notes & details.txt"
+Content-Disposition: attachment; filename="notes & details.txt"
+Content-Transfer-Encoding: 8bit
+
+Anhang aus dem EML Viewer Test.
+--emlviewer-boundary--

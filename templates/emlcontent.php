@@ -10,7 +10,9 @@
 if (!empty($_['attachments']) && count($_['attachments']) > 0) {
     echo '<p>Attachments: ';
     foreach ($_['attachments'] as $ind => $filename) {
-        echo '<a href="' . $_['urlAttachment'] . $ind . '"><button type="button" >' . $filename . '</button></a>';
+        ?>
+        <a href="<?php p($_['urlAttachment'] . $ind) ?>"><button type="button"><?php p($filename) ?></button></a>
+        <?php
     }
     echo '</p>';
 }
@@ -33,11 +35,14 @@ if (!empty($_['attachments']) && count($_['attachments']) > 0) {
         <?php p($_['textContent']) ?>
     </div>
 <?php } ?>
-<div style="flex: 1;">Content:<br/>
+<div class="emlviewer-body">
+    <div>Content:</div>
     <?php if (!empty($_['htmlContent'])) { ?>
 
         <iframe
                 class="emlviewer_email_html_content"
+                sandbox="allow-popups allow-popups-to-escape-sandbox"
+                referrerpolicy="no-referrer"
                 srcdoc="<?php p($_['htmlContent']) ?>"
         ></iframe>
 
