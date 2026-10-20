@@ -1,6 +1,6 @@
 {
   "name": "emlviewer",
-  "version": "2.1.1-beta.1",
+  "version": "2.1.1-beta.2",
   "license": "AGPL-3.0-or-later",
   "engines": {
     "node": "^24.0.0",

@@ -1,3 +1,8 @@
+## 2.1.1-beta.2 – 2026-10-20
+- Resolve complete CID URLs without changing message text; handle encoded IDs and prioritize Content-IDs over filename fallbacks.
+- Convert inline WebP images to PNG with transparency for previews, printing, and PDF export.
+- Add regression tests for inline images, attachment links, and invalid WebP data.
+
 ## 2.1.1-beta.1 – 2026-10-19
 - Community beta for Nextcloud 35, based on the changes proposed upstream.
 - Fix preview, printing, and PDF export compatibility; use Nextcloud-managed temporary storage.
