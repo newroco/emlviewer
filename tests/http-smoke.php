@@ -105,6 +105,8 @@ try {
     $shareUrl = $base . '/index.php/s/' . $shares['password']->getToken();
     [, $authPage, $authUrl] = request($shareUrl, $anonymousCookie);
     request($authUrl, $anonymousCookie, ['password' => 'emlviewer-smoke-password', 'requesttoken' => csrfToken($authPage)]);
+    [$status, $html] = request($route . 'emlparse?' . $query, $anonymousCookie);
+    check($status === 200 && str_contains($html, 'EML Viewer sample email'), 'Password-protected share preview after Nextcloud authentication');
     [$status, $pdf] = request($route . 'pdf?' . $query, $anonymousCookie);
     check($status === 200 && str_starts_with($pdf, '%PDF-'), 'Password-protected share PDF after Nextcloud authentication');
 } finally {

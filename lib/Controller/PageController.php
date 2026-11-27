@@ -128,7 +128,10 @@ class PageController extends Controller {
                 || $share->isExpired() || !$share->canSeeContent() || !$share->canDownload()) {
                 throw new NotPermittedException('This share does not allow reading email content');
             }
-            if ($share->isPasswordProtected()) {
+            $passwordProtected = method_exists($share, 'isPasswordProtected')
+                ? $share->isPasswordProtected()
+                : $share->getPassword() !== null;
+            if ($passwordProtected) {
                 $tokens = json_decode($this->session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND) ?? '[]', true);
                 if (!is_array($tokens) || !is_string($tokens[$this->shareToken] ?? null)
                     || !hash_equals($share->getPassword(), $tokens[$this->shareToken])) {

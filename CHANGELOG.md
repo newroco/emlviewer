@@ -1,5 +1,7 @@
 ## 2.1.1 – 2026-11-27
 - Prepared for a new release
+- Checked and proved working well on NC34 as well
+- Fix public-link previews and exports on Nextcloud 34.
 
 ## 2.1.1-beta.2 – 2026-10-20
 - Resolve complete CID URLs without changing message text; handle encoded IDs and prioritize Content-IDs over filename fallbacks.

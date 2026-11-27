@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
 class SharedEmailTest extends TestCase {
-    private function controller(?string $passwordHash = null, ?string $sessionHash = null, bool $download = true, ?string $folderPath = null): PageController {
+    private function controller(?string $passwordHash = null, ?string $sessionHash = null, bool $download = true, ?string $folderPath = null, bool $protectedWithoutPassword = false): PageController {
         $request = $this->createStub(IRequest::class);
         $request->method('getParam')->willReturnCallback(fn ($name, $default = null) =>
             ['eml_file' => $folderPath ?? '/sample.eml', 'share_token' => 'test-token'][$name] ?? $default);
@@ -39,7 +39,9 @@ class SharedEmailTest extends TestCase {
         $share->method('getShareType')->willReturn(IShare::TYPE_LINK);
         $share->method('canSeeContent')->willReturn(true);
         $share->method('canDownload')->willReturn($download);
-        $share->method('isPasswordProtected')->willReturn($passwordHash !== null);
+        if (method_exists(IShare::class, 'isPasswordProtected')) {
+            $share->method('isPasswordProtected')->willReturn($passwordHash !== null || $protectedWithoutPassword);
+        }
         $share->method('getPassword')->willReturn($passwordHash);
         $manager = $this->createStub(IManager::class);
         $manager->method('shareApiEnabled')->willReturn(true);
@@ -65,6 +67,20 @@ class SharedEmailTest extends TestCase {
 
     public function testPasswordProtectedShareRequiresAuthentication(): void {
         self::assertSame(403, $this->controller('password-hash')->emlPrint()->getStatus());
+    }
+
+    public function testLegacyShareWithEmptyPasswordIsProtected(): void {
+        if (method_exists(IShare::class, 'isPasswordProtected')) {
+            self::markTestSkipped('Nextcloud provides its own password protection check.');
+        }
+        self::assertSame(403, $this->controller('')->emlPrint()->getStatus());
+    }
+
+    public function testShareProtectedByOtherMeansRequiresAuthentication(): void {
+        if (!method_exists(IShare::class, 'isPasswordProtected')) {
+            self::markTestSkipped('Nextcloud does not provide this password protection check.');
+        }
+        self::assertSame(403, $this->controller(protectedWithoutPassword: true)->emlPrint()->getStatus());
     }
 
     public function testAuthenticatedShareIsReadable(): void {
