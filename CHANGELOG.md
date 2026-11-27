@@ -1,3 +1,6 @@
+## 2.1.1 – 2026-11-27
+- Prepared for a new release
+
 ## 2.1.1-beta.2 – 2026-10-20
 - Resolve complete CID URLs without changing message text; handle encoded IDs and prioritize Content-IDs over filename fallbacks.
 - Convert inline WebP images to PNG with transparency for previews, printing, and PDF export.
