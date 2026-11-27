@@ -15,5 +15,6 @@ webpackConfig.stats = {
 const appId = 'emlviewer'
 webpackConfig.entry = {
 	main: { import: path.join(__dirname, 'src', 'script.js'), filename: appId + '-script.js' },
+	print: { import: path.join(__dirname, 'src', 'print.js'), filename: appId + '-print.js' },
 }
 module.exports = webpackConfig
