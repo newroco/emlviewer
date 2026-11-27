@@ -1,9 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OCA\EmlViewer\Tests\Integration\Controller;
 
+use OCA\EmlViewer\AppInfo\Application;
+use OCA\EmlViewer\Controller\PageController;
 use OCP\AppFramework\App;
-use Test\TestCase;
+use OCP\Server;
+use PHPUnit\Framework\TestCase;
 
 
 /**
@@ -16,7 +21,7 @@ class AppTest extends TestCase
 
     private $container;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $app = new App('emlviewer');
@@ -27,6 +32,18 @@ class AppTest extends TestCase
     {
         $appManager = $this->container->get('OCP\App\IAppManager');
         $this->assertTrue($appManager->isInstalled('emlviewer'));
+        $this->assertInstanceOf(PageController::class, $this->container->get(PageController::class));
+    }
+
+    public function testApplicationBootUsesAvailableNextcloudApis(): void
+    {
+        $context = $this->createMock(\OCP\AppFramework\Bootstrap\IBootContext::class);
+        $context->expects(self::exactly(2))->method('injectFn')->willReturnCallback(function (callable $callback) {
+            $arguments = array_map(fn ($parameter) => Server::get($parameter->getType()->getName()),
+                (new \ReflectionFunction($callback))->getParameters());
+            $callback(...$arguments);
+        });
+        (new Application())->boot($context);
     }
 
 }

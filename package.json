@@ -1,6 +1,6 @@
 {
   "name": "emlviewer",
-  "version": "1.0.0",
+  "version": "2.1.1-beta.2",
   "license": "AGPL-3.0-or-later",
   "engines": {
     "node": "^24.0.0",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@nextcloud/axios": "^2.6.0",
     "@nextcloud/files": "^4.0.0",
+    "@nextcloud/l10n": "^3.4.1",
     "@nextcloud/router": "^3.1.0",
     "@nextcloud/sharing": "^0.4.0"
   },

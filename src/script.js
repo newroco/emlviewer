@@ -1,6 +1,7 @@
 /* eslint-disable jsdoc/require-param-description */
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import { translate as t } from '@nextcloud/l10n'
 import { registerFileAction, DefaultType, Permission } from '@nextcloud/files'
 import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
@@ -23,11 +24,11 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 
 		bringInSidebar() {
 			const defaultHtml = `
-                <span class="close icon-close"></span>
+                <button type="button" class="emlviewer-close" aria-label="Close email preview">×</button>
                 <div class="mail-content"><br/><br/>Preparing preview... please wait.</div>
             `
 
-			const appSidebar = document.getElementById('app-sidebar')
+			const appSidebar = document.getElementById('emlviewer-sidebar')
 			if (appSidebar) {
 				appSidebar.remove()
 			}
@@ -38,7 +39,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 			}
 
 			const newSidebar = document.createElement('div')
-			newSidebar.id = 'app-sidebar'
+			newSidebar.id = 'emlviewer-sidebar'
 			newSidebar.className = 'emlviewer'
 			newSidebar.innerHTML = defaultHtml
 			if (appContent) {
@@ -47,7 +48,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 				document.body.appendChild(newSidebar)
 			}
 
-			const closeIcon = document.querySelector('.icon-close')
+			const closeIcon = newSidebar.querySelector('.emlviewer-close')
 
 			if (closeIcon) {
 				closeIcon.addEventListener('click', () => {
@@ -55,30 +56,32 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 					newSidebar.remove()
 				})
 			}
+			return newSidebar
 		},
 
 		/**
 		 * @param filePath
 		 */
 
-		displayParsedEmail(filePath, shareToken = '') {
+		displayParsedEmail(filePath, shareToken = '', sidebar) {
 			const parserUrl = generateUrl(OCA.FilesEmlViewer.PreviewEml._baseUrl + '/emlparse?eml_file={file}&share_token={token}', {
 				file: filePath,
 				token: shareToken,
 			})
 			axios.get(parserUrl)
 				.then((response) => {
-					const mailContentElement = document.querySelector('.mail-content')
+					if (!sidebar.isConnected) return
+					const mailContentElement = sidebar.querySelector('.mail-content')
 					if (mailContentElement) {
 						mailContentElement.innerHTML = response.data
 					}
 
 					const makePdfElement = document.getElementById('make-pdf')
-					const toggleTextContentButton = document.getElementById('toggle-text-content')
+					const toggleTextContentButton = sidebar.querySelector('#toggle-text-content')
 					if (toggleTextContentButton) {
 						toggleTextContentButton.addEventListener('click', () => {
 
-							const emailTextContentElement = document.querySelector('.emlviewer_email_text_content')
+							const emailTextContentElement = sidebar.querySelector('.emlviewer_email_text_content')
 							if (emailTextContentElement) {
 								emailTextContentElement.classList.toggle('fade-out')
 							}
@@ -89,7 +92,7 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 				})
 				.catch((error) => {
 
-					const mailContentElement = document.querySelector('.mail-content')
+					const mailContentElement = sidebar.querySelector('.mail-content')
 
 					if (mailContentElement) {
 						mailContentElement.innerHTML = 'Could not load data from server.'
@@ -104,8 +107,8 @@ import { isPublicShare, getSharingToken } from '@nextcloud/sharing/public'
 		 * @param {string} [shareToken]
 		 */
 		show(filePath, shareToken) {
-			this.bringInSidebar()
-			this.displayParsedEmail(filePath, shareToken)
+			const sidebar = this.bringInSidebar()
+			this.displayParsedEmail(filePath, shareToken, sidebar)
 		},
 
 
@@ -138,13 +141,13 @@ function registerEmlFileAction() {
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"/></svg>`
 	registerFileAction({
 		id: 'eml_view',
-		displayName: () => t('view', 'View'),
+		displayName: () => t('emlviewer', 'View'),
 		default: DefaultType.DEFAULT,
 		order: 0,
 		mime: 'message/rfc822',
 		enabled: ({ nodes }) => {
 			try {
-				if (!Array.isArray(nodes) || nodes.length === 0) {
+				if (!Array.isArray(nodes) || nodes.length !== 1) {
 					return false
 				}
 
@@ -155,7 +158,6 @@ function registerEmlFileAction() {
 			}
 		},
 		iconSvgInline: () => {return svg},
-		permissions: OC.PERMISSION_READ,
 		async exec({ nodes }) {
 			const node = nodes?.[0]
 			if (!node?.path) {
